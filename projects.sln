@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "apps", "apps", "{7CC57615-BF02-46B8-A8A9-5F8B2BAD3171}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImgurCli", "apps\imgur-cli\ImgurCli.csproj", "{C1664E5D-17FA-4B1D-ABCB-9F26242B73BC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImgurCli.Test", "apps\imgur-cli-test\ImgurCli.Test.csproj", "{31528DCF-29C0-4175-A7E9-6638B10F21EE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C1664E5D-17FA-4B1D-ABCB-9F26242B73BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C1664E5D-17FA-4B1D-ABCB-9F26242B73BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C1664E5D-17FA-4B1D-ABCB-9F26242B73BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C1664E5D-17FA-4B1D-ABCB-9F26242B73BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31528DCF-29C0-4175-A7E9-6638B10F21EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31528DCF-29C0-4175-A7E9-6638B10F21EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31528DCF-29C0-4175-A7E9-6638B10F21EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31528DCF-29C0-4175-A7E9-6638B10F21EE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C1664E5D-17FA-4B1D-ABCB-9F26242B73BC} = {7CC57615-BF02-46B8-A8A9-5F8B2BAD3171}
+		{31528DCF-29C0-4175-A7E9-6638B10F21EE} = {7CC57615-BF02-46B8-A8A9-5F8B2BAD3171}
+	EndGlobalSection
+EndGlobal

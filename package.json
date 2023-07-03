@@ -3,12 +3,14 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
+    "prepare": "nx g @nx-dotnet/core:restore"
   },
   "private": true,
-  "dependencies": {
-  },
   "devDependencies": {
-    "nx": "16.4.2",
-    "@nx/workspace": "16.4.2"
-  }
+    "@nrwl/js": "16.4.2",
+    "@nx-dotnet/core": "^1.22.0",
+    "@nx/workspace": "16.4.2",
+    "nx": "16.4.2"
+  },
+  "dependencies": {}
 }

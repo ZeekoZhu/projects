@@ -33,5 +33,13 @@
       "default"
     ],
     "sharedGlobals": []
-  }
+  },
+  "generators": {
+    "@nx-dotnet/core:application": {
+      "solutionFile": "projects.sln"
+    }
+  },
+  "plugins": [
+    "@nx-dotnet/core"
+  ]
 }
