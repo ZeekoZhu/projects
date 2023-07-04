@@ -2,8 +2,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Core;
 using Serilog.Events;
+using Spectre.Console;
 using Volo.Abp;
+using Zeeko.ImgurCli.Commands;
 
 namespace Zeeko.ImgurCli;
 
@@ -11,25 +14,22 @@ public class Program
 {
   public static async Task<int> Main(string[] args)
   {
+    var levelSwitch = new LoggingLevelSwitch(LogEventLevel.Warning);
+    var appLevelSwitch = new LoggingLevelSwitch();
     Log.Logger = new LoggerConfiguration()
-#if DEBUG
-      .MinimumLevel.Debug()
-#else
-            .MinimumLevel.Information()
-#endif
-      .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+      .MinimumLevel.ControlledBy(levelSwitch)
+      .MinimumLevel.Override("Zeeko", appLevelSwitch)
       .Enrich.FromLogContext()
       .WriteTo.Async(c => c.Console())
       .CreateLogger();
 
     try
     {
-      var builder = Host.CreateDefaultBuilder(args);
+      var builder = Host.CreateDefaultBuilder();
 
       builder.ConfigureServices(
           services =>
           {
-            services.AddHostedService<ImgurCliHostedService>();
             services.AddApplicationAsync<ImgurCliModule>(
               options =>
               {
@@ -39,15 +39,19 @@ public class Program
           })
         .AddAppSettingsSecretsJson()
         .UseAutofac()
-        .UseConsoleLifetime();
+        .UseCommandLineApplication<RootCommand>(args);
 
       var host = builder.Build();
       await host.Services.GetRequiredService<IAbpApplicationWithExternalServiceProvider>()
         .InitializeAsync(host.Services);
 
-      await host.RunAsync();
+      if (host.Services.GetRequiredService<IHostEnvironment>().IsDevelopment())
+      {
+        levelSwitch.MinimumLevel = LogEventLevel.Debug;
+        appLevelSwitch.MinimumLevel = LogEventLevel.Debug;
+      }
 
-      return 0;
+      return await host.RunCommandLineApplicationAsync();
     }
     catch (Exception ex)
     {
@@ -56,12 +60,12 @@ public class Program
         throw;
       }
 
-      Log.Fatal(ex, "Terminated unexpectedly!");
+      AnsiConsole.WriteException(ex);
       return 1;
     }
     finally
     {
-      Log.CloseAndFlush();
+      await Log.CloseAndFlushAsync();
     }
   }
 }
