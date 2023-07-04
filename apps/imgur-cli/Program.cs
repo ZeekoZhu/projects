@@ -1,6 +1,7 @@
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -12,8 +13,14 @@ namespace Zeeko.ImgurCli;
 
 public class Program
 {
+  private static readonly string ConfigFilePath = Path.Join(
+    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+    "zeeko-imgur-cli");
+
   public static async Task<int> Main(string[] args)
   {
+    // ensure the config directory exists
+    Directory.CreateDirectory(ConfigFilePath);
     var levelSwitch = new LoggingLevelSwitch(LogEventLevel.Warning);
     var appLevelSwitch = new LoggingLevelSwitch();
     Log.Logger = new LoggerConfiguration()
@@ -33,12 +40,17 @@ public class Program
             services.AddApplicationAsync<ImgurCliModule>(
               options =>
               {
+                options.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(ConfigFilePath));
                 options.Services.ReplaceConfiguration(services.GetConfiguration());
                 options.Services.AddLogging(loggingBuilder => loggingBuilder.ClearProviders().AddSerilog());
               });
           })
-        .AddAppSettingsSecretsJson()
         .UseAutofac()
+        .ConfigureAppConfiguration(
+          b =>
+          {
+            b.SetBasePath(ConfigFilePath).AddJsonFile("appsettings.json", true, false);
+          })
         .UseCommandLineApplication<RootCommand>(args);
 
       var host = builder.Build();
