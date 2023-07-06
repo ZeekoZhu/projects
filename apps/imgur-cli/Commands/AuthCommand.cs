@@ -1,7 +1,3 @@
-using System.Text.RegularExpressions;
-using Imgur.API.Authentication;
-using Imgur.API.Endpoints;
-using Imgur.API.Models;
 using McMaster.Extensions.CommandLineUtils;
 using Spectre.Console;
 using Volo.Abp.DependencyInjection;
@@ -18,6 +14,7 @@ public class AuthCommand : CommandBase
   public required string ClientSecret { get; init; }
 
   protected ConfigFileProvider ConfigFileProvider => LazyServiceProvider.LazyGetRequiredService<ConfigFileProvider>();
+  protected ImgurService Imgur => LazyServiceProvider.LazyGetRequiredService<ImgurService>();
 
 
   public AuthCommand(IAbpLazyServiceProvider lazyServiceProvider) : base(lazyServiceProvider)
@@ -26,40 +23,15 @@ public class AuthCommand : CommandBase
 
   public override async Task<int> OnExecuteAsync(CommandLineApplication app)
   {
-    Logger.LogDebug("OAuth2: {ClientId} {ClientSecret}", ClientId, ClientSecret);
-    var apiClient = new ApiClient(ClientId, ClientSecret);
-    var httpClient = new HttpClient();
-
-    var oAuth2Endpoint = new OAuth2Endpoint(apiClient, httpClient);
-    var authUrl = oAuth2Endpoint.GetAuthorizationUrl();
-    Logger.LogInformation("Auth URL: {AuthUrl}", authUrl);
+    var clientInfo = new ClientInfo(ClientId, ClientSecret);
+    var authUrl = Imgur.GetAuthUrl(clientInfo);
+    Cli.WriteLine(authUrl, new Style(foreground: Color.Green, decoration: Decoration.Underline, link: authUrl));
+    Cli.WriteLine(
+      "Open the above URL in your browser and authorize the app, after the redirection, copy the url from address bar and paste it here.");
     var redirectUrl =
-      Cli.Ask<string>(
-        "Open the above URL in your browser and authorize the app, after the redirection, copy the url from address bar and paste it here.\n");
-    var token = ExtractToken(redirectUrl);
-    ConfigFileProvider.UpdateConfig(new AppConfig { Token = token });
-    Logger.LogDebug("OAuth2 Token: {@Token}", token);
+      Cli.Ask<string>("> ");
+    await Imgur.RefreshTokenAsync(clientInfo, redirectUrl);
+    Cli.MarkupLineInterpolated($"[green]Login successful![/]");
     return 0;
-  }
-
-  private OAuth2Token ExtractToken(string redirectUrl)
-  {
-    var regex = new Regex(
-      "#access_token=(?<access_token>.+)&expires_in=(?<expires_in>.+)&token_type=(?<token_type>.+)&refresh_token=(?<refresh_token>.+)&account_username=(?<account_username>.+)&account_id=(?<account_id>.+)");
-    var match = regex.Match(redirectUrl);
-    if (!match.Success)
-    {
-      throw new ApplicationException("Invalid redirect url");
-    }
-
-    return new OAuth2Token
-    {
-      AccessToken = match.Groups["access_token"].Value,
-      RefreshToken = match.Groups["refresh_token"].Value,
-      AccountId = int.Parse(match.Groups["account_id"].Value),
-      AccountUsername = match.Groups["account_username"].Value,
-      ExpiresIn = int.Parse(match.Groups["expires_in"].Value),
-      TokenType = match.Groups["token_type"].Value
-    };
   }
 }

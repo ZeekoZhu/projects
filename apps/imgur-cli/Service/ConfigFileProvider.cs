@@ -1,5 +1,3 @@
-using System.Security.AccessControl;
-using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -64,7 +62,10 @@ public class ConfigFileProvider : ISingletonDependency
   }
 }
 
+public record ClientInfo(string ClientId, string ClientSecret);
+
 public record AppConfig
 {
   public OAuth2Token? Token { get; set; }
+  public ClientInfo? ClientInfo { get; set; }
 }
