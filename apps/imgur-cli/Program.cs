@@ -8,19 +8,15 @@ using Serilog.Events;
 using Spectre.Console;
 using Volo.Abp;
 using Zeeko.ImgurCli.Commands;
+using Zeeko.ImgurCli.Service;
 
 namespace Zeeko.ImgurCli;
 
 public class Program
 {
-  private static readonly string ConfigFilePath = Path.Join(
-    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-    "zeeko-imgur-cli");
 
   public static async Task<int> Main(string[] args)
   {
-    // ensure the config directory exists
-    Directory.CreateDirectory(ConfigFilePath);
     var levelSwitch = new LoggingLevelSwitch(LogEventLevel.Warning);
     var appLevelSwitch = new LoggingLevelSwitch();
     Log.Logger = new LoggerConfiguration()
@@ -40,7 +36,7 @@ public class Program
             services.AddApplicationAsync<ImgurCliModule>(
               options =>
               {
-                options.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(ConfigFilePath));
+                options.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(ConfigFileProvider.ConfigDirPath));
                 options.Services.ReplaceConfiguration(services.GetConfiguration());
                 options.Services.AddLogging(loggingBuilder => loggingBuilder.ClearProviders().AddSerilog());
               });
@@ -49,7 +45,7 @@ public class Program
         .ConfigureAppConfiguration(
           b =>
           {
-            b.SetBasePath(ConfigFilePath).AddJsonFile("appsettings.json", true, false);
+            b.SetBasePath(ConfigFileProvider.ConfigDirPath).AddJsonFile("appsettings.json", true, false);
           })
         .UseCommandLineApplication<RootCommand>(args);
 

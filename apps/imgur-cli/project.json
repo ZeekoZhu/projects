@@ -20,6 +20,21 @@
         }
       }
     },
+    "publish": {
+      "executor": "@nx-dotnet/core:publish",
+      "options": {
+        "configuration": "Debug",
+        "noDependencies": true
+      },
+      "configurations": {
+        "production": {
+          "configuration": "Release"
+        }
+      },
+      "dependsOn": [
+        "build"
+      ]
+    },
     "serve": {
       "executor": "@nx-dotnet/core:serve",
       "options": {

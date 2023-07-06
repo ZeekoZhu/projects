@@ -5,6 +5,7 @@ using Imgur.API.Models;
 using McMaster.Extensions.CommandLineUtils;
 using Spectre.Console;
 using Volo.Abp.DependencyInjection;
+using Zeeko.ImgurCli.Service;
 
 namespace Zeeko.ImgurCli.Commands;
 
@@ -15,6 +16,8 @@ public class AuthCommand : CommandBase
 
   [Option("-s|--client-secret", Description = "Client Secret")]
   public required string ClientSecret { get; init; }
+
+  protected ConfigFileProvider ConfigFileProvider => LazyServiceProvider.LazyGetRequiredService<ConfigFileProvider>();
 
 
   public AuthCommand(IAbpLazyServiceProvider lazyServiceProvider) : base(lazyServiceProvider)
@@ -33,12 +36,13 @@ public class AuthCommand : CommandBase
     var redirectUrl =
       Cli.Ask<string>(
         "Open the above URL in your browser and authorize the app, after the redirection, copy the url from address bar and paste it here.\n");
-    IOAuth2Token token = ExtractToken(redirectUrl);
-    Logger.LogDebug("OAuth2 Token: {Token}", token);
+    var token = ExtractToken(redirectUrl);
+    ConfigFileProvider.UpdateConfig(new AppConfig { Token = token });
+    Logger.LogDebug("OAuth2 Token: {@Token}", token);
     return 0;
   }
 
-  private IOAuth2Token ExtractToken(string redirectUrl)
+  private OAuth2Token ExtractToken(string redirectUrl)
   {
     var regex = new Regex(
       "#access_token=(?<access_token>.+)&expires_in=(?<expires_in>.+)&token_type=(?<token_type>.+)&refresh_token=(?<refresh_token>.+)&account_username=(?<account_username>.+)&account_id=(?<account_id>.+)");
