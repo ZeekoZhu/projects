@@ -68,7 +68,9 @@ public class ConfigFileProvider : ISingletonDependency
     {
       case PlatformID.Unix:
       case PlatformID.MacOSX:
+#pragma warning disable CA1416
         File.SetUnixFileMode(filePath, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+#pragma warning restore CA1416
         break;
     }
   }

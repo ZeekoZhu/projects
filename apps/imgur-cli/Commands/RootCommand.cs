@@ -6,10 +6,10 @@ namespace Zeeko.ImgurCli.Commands;
 [Subcommand(typeof(AuthCommand), typeof(UploadCommand))]
 public class RootCommand : CommandBase
 {
-  public override async Task<int> OnExecuteAsync(CommandLineApplication app)
+  public override Task<int> OnExecuteAsync(CommandLineApplication app)
   {
     app.ShowHelp();
-    return 0;
+    return Task.FromResult(0);
   }
 
   public RootCommand(IAbpLazyServiceProvider lazyServiceProvider) : base(lazyServiceProvider)
