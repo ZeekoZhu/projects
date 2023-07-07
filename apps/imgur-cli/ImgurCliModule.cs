@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 using Volo.Abp;
 using Volo.Abp.Autofac;
