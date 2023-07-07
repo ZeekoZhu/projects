@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - '*'
   pull_request:
 
 jobs:
@@ -17,5 +19,26 @@ jobs:
 
       - run: npx nx format:check
       - run: npx nx affected -t lint --parallel=3
-      - run: npx nx affected -t test --parallel=3 --configuration=ci
+      - run: npx nx affected -t test --parallel=3 -c=production
       - run: npx nx affected -t build --parallel=3
+      - run: npx nx publish-all imgur-cli -c production 
+      - uses: actions/upload-artifact@v3
+        with:
+          name: dist
+          path: ./dist
+
+  release:
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: check
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: nrwl/nx-set-shas@v3
+      - run: npm ci
+      - uses: actions/download-artifact@v3
+        with:
+          name: dist
+          path: ./dist
+      - run: ./tools/scripts/release_binary.sh imgur-cli
