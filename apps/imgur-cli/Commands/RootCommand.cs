@@ -1,10 +1,9 @@
 using McMaster.Extensions.CommandLineUtils;
-using Microsoft.Extensions.Logging;
 using Volo.Abp.DependencyInjection;
 
 namespace Zeeko.ImgurCli.Commands;
 
-[Subcommand(typeof(AuthCommand))]
+[Subcommand(typeof(AuthCommand), typeof(UploadCommand))]
 public class RootCommand : CommandBase
 {
   public override async Task<int> OnExecuteAsync(CommandLineApplication app)

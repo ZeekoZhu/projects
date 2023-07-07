@@ -1,9 +1,11 @@
+using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Imgur.API.Models;
 using Microsoft.Extensions.Options;
 using Volo.Abp.DependencyInjection;
+using Volo.Abp.ObjectMapping;
 
 namespace Zeeko.ImgurCli.Service;
 
@@ -11,15 +13,19 @@ public class ConfigFileProvider : ISingletonDependency
 {
   public const string ConfigKey = nameof(AppConfig);
 
+  public required IObjectMapper<ImgurCliModule> ObjectMapper { protected get; init; }
+
   public static readonly string ConfigDirPath = Path.Join(
     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
     "zeeko-imgur-cli");
 
-  public string ConfigFilePath => Path.Join(ConfigDirPath, "appsettings.json");
+  public static string ConfigFilePath => Path.Join(ConfigDirPath, "appsettings.json");
 
   static ConfigFileProvider()
   {
     Directory.CreateDirectory(ConfigDirPath);
+    if (!File.Exists(ConfigFilePath))
+      File.WriteAllText(ConfigFilePath, "{}", Encoding.UTF8);
   }
 
   public AppConfig AppConfig => AppConfigOptions.Value;
@@ -29,6 +35,12 @@ public class ConfigFileProvider : ISingletonDependency
   {
     // serialize AppConfig into json dom
     var dom = JsonSerializer.SerializeToNode(config);
+    if (config.Token is not null)
+    {
+      var tokenDom = JsonSerializer.SerializeToNode(ObjectMapper.Map<OAuth2Token, AppAuthToken>(config.Token));
+      dom![nameof(Service.AppConfig.Token)] = tokenDom;
+    }
+
     // read config file as json dom
     var configFileContent = File.ReadAllText(ConfigFilePath);
     var configDom = JsonNode.Parse(configFileContent);
@@ -68,4 +80,14 @@ public record AppConfig
 {
   public OAuth2Token? Token { get; set; }
   public ClientInfo? ClientInfo { get; set; }
+}
+
+public class AppAuthToken : IOAuth2Token
+{
+  public required string AccessToken { get; init; }
+  public required int ExpiresIn { get; init; }
+  public required string TokenType { get; init; }
+  public required string RefreshToken { get; init; }
+  public required int AccountId { get; init; }
+  public required string AccountUsername { get; init; }
 }

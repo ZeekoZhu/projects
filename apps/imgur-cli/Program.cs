@@ -22,6 +22,7 @@ public class Program
     Log.Logger = new LoggerConfiguration()
       .MinimumLevel.ControlledBy(levelSwitch)
       .MinimumLevel.Override("Zeeko", appLevelSwitch)
+      .MinimumLevel.Override("System.Net.Http.HttpClient", appLevelSwitch)
       .Enrich.FromLogContext()
       .WriteTo.Async(c => c.Console())
       .CreateLogger();
