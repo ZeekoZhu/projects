@@ -2,16 +2,25 @@ using System.Text.RegularExpressions;
 using Imgur.API.Authentication;
 using Imgur.API.Endpoints;
 using Imgur.API.Models;
-using Volo.Abp.DependencyInjection;
-using Volo.Abp.ObjectMapping;
 
 namespace Zeeko.ImgurCli.Service;
 
 public class ImgurService : ITransientDependency
 {
-  public required IHttpClientFactory HttpClientFactory { get; init; }
-  public HttpClient HttpClient => HttpClientFactory.CreateClient("imgur");
-  public required ConfigFileProvider ConfigFileProvider { get; init; }
+  public ImgurService(
+    IHttpClientFactory httpClientFactory,
+    ConfigFileProvider configFileProvider,
+    ILogger<ImgurService> logger)
+  {
+    HttpClientFactory = httpClientFactory;
+    ConfigFileProvider = configFileProvider;
+    Logger = logger;
+    HttpClient = HttpClientFactory.CreateClient("imgur");
+  }
+
+  public IHttpClientFactory HttpClientFactory { get; init; }
+  public HttpClient HttpClient { get; init; }
+  public ConfigFileProvider ConfigFileProvider { get; init; }
 
   protected ClientInfo ClientInfo =>
     ConfigFileProvider.AppConfig.ClientInfo ??
@@ -22,7 +31,7 @@ public class ImgurService : ITransientDependency
     throw new InvalidOperationException("No token provided, please run `imgur-cli auth` first");
 
 
-  public required ILogger<ImgurService> Logger { get; init; }
+  public ILogger<ImgurService> Logger { get; init; }
 
   public string GetAuthUrl(ClientInfo? clientInfo)
   {

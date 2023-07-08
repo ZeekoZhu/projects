@@ -1,5 +1,5 @@
 using McMaster.Extensions.CommandLineUtils;
-using Volo.Abp.DependencyInjection;
+using Zeeko.ImgurCli.Service;
 
 namespace Zeeko.ImgurCli.Commands;
 
@@ -12,7 +12,7 @@ public class RootCommand : CommandBase
     return Task.FromResult(0);
   }
 
-  public RootCommand(IAbpLazyServiceProvider lazyServiceProvider) : base(lazyServiceProvider)
+  public RootCommand(LazyServiceProvider lazyServiceProvider) : base(lazyServiceProvider)
   {
   }
 }

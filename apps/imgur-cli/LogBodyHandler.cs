@@ -1,4 +1,4 @@
-using Volo.Abp.DependencyInjection;
+using Zeeko.ImgurCli.Service;
 
 namespace Zeeko.ImgurCli;
 
@@ -29,15 +29,18 @@ public class LogBodyHandler : DelegatingHandler, ITransientDependency
     }
 
     var resp = await base.SendAsync(request, cancellationToken);
+
     // log the response body
     // if the response body is json
-    if (resp.Content?.Headers.ContentType?.MediaType == "application/json")
+    if (resp.Content.Headers.ContentType?.MediaType != "application/json")
     {
-      // read the response body
-      string responseBody = await resp.Content.ReadAsStringAsync(cancellationToken);
-      // log the response body
-      _logger.LogDebug("Response Body: {ResponseBody}", responseBody);
+      return resp;
     }
+
+    // read the response body
+    string responseBody = await resp.Content.ReadAsStringAsync(cancellationToken);
+    // log the response body
+    _logger.LogDebug("Response Body: {ResponseBody}", responseBody);
 
     return resp;
   }

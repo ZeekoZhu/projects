@@ -1,3 +1,5 @@
+using Mapster;
+using MapsterMapper;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -6,7 +8,6 @@ using Serilog;
 using Serilog.Core;
 using Serilog.Events;
 using Spectre.Console;
-using Volo.Abp;
 using Zeeko.ImgurCli.Commands;
 using Zeeko.ImgurCli.Service;
 
@@ -14,7 +15,6 @@ namespace Zeeko.ImgurCli;
 
 public class Program
 {
-
   public static async Task<int> Main(string[] args)
   {
     var levelSwitch = new LoggingLevelSwitch(LogEventLevel.Warning);
@@ -24,7 +24,7 @@ public class Program
       .MinimumLevel.Override("Zeeko", appLevelSwitch)
       .MinimumLevel.Override("System.Net.Http.HttpClient", levelSwitch)
       .Enrich.FromLogContext()
-      .WriteTo.Async(c => c.Console())
+      .WriteTo.Console()
       .CreateLogger();
 
     try
@@ -32,27 +32,27 @@ public class Program
       var builder = Host.CreateDefaultBuilder();
 
       builder.ConfigureServices(
-          services =>
+          (ctx, services) =>
           {
-            services.AddApplicationAsync<ImgurCliModule>(
-              options =>
-              {
-                options.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(ConfigFileProvider.ConfigDirPath));
-                options.Services.ReplaceConfiguration(services.GetConfiguration());
-                options.Services.AddLogging(loggingBuilder => loggingBuilder.ClearProviders().AddSerilog());
-              });
+            ConfigureDI(services);
+            ConfigureMapster(services);
+            ConfigureAppConfig(services, ctx);
+
+            services.AddSingleton(AnsiConsole.Console);
+            services.AddHttpClient("imgur")
+              .AddHttpMessageHandler(sp => sp.GetRequiredService<LogBodyHandler>());
+            services.AddLogging(loggingBuilder => loggingBuilder.ClearProviders().AddSerilog());
           })
-        .UseAutofac()
         .ConfigureAppConfiguration(
           b =>
           {
-            b.SetBasePath(ConfigFileProvider.ConfigDirPath).AddJsonFile("appsettings.json", true, false);
+            b.SetBasePath(ConfigFileProvider.ConfigDirPath).Sources.Clear();
+            b.AddEnvironmentVariables("DOTNET_");
           })
         .UseCommandLineApplication<RootCommand>(args);
 
+
       var host = builder.Build();
-      await host.Services.GetRequiredService<IAbpApplicationWithExternalServiceProvider>()
-        .InitializeAsync(host.Services);
 
       if (host.Services.GetRequiredService<IHostEnvironment>().IsDevelopment())
       {
@@ -76,5 +76,37 @@ public class Program
     {
       await Log.CloseAndFlushAsync();
     }
+  }
+
+  private static void ConfigureAppConfig(IServiceCollection services, HostBuilderContext ctx)
+  {
+    services.AddSingleton<IFileProvider>(
+      new PhysicalFileProvider(ConfigFileProvider.ConfigDirPath));
+    services.Configure<AppConfig>(ctx.Configuration.GetSection(ConfigFileProvider.ConfigKey));
+  }
+
+  private static void ConfigureMapster(IServiceCollection services)
+  {
+    // Mapster
+    services.AddSingleton(TypeAdapterConfig.GlobalSettings);
+    services.AddSingleton<IMapper, ServiceMapper>();
+  }
+
+  private static void ConfigureDI(IServiceCollection services)
+  {
+    // Dependency Injection
+    services.Scan(
+      scan => scan.FromAssemblyOf<ITransientDependency>()
+        .AddClasses(classes => classes.AssignableTo<ITransientDependency>())
+        .AsSelfWithInterfaces()
+        .WithTransientLifetime()
+        .AddClasses(classes => classes.AssignableTo<ISingletonDependency>())
+        .AsSelfWithInterfaces()
+        .WithSingletonLifetime()
+        .AddClasses(classes => classes.AssignableTo<IScopedDependency>())
+        .AsSelfWithInterfaces()
+        .WithSingletonLifetime()
+    );
+    services.AddTransient<ILazyServiceProvider, LazyServiceProvider>();
   }
 }

@@ -1,6 +1,5 @@
 using McMaster.Extensions.CommandLineUtils;
 using Spectre.Console;
-using Volo.Abp.DependencyInjection;
 using Zeeko.ImgurCli.Service;
 
 namespace Zeeko.ImgurCli.Commands;
@@ -13,11 +12,10 @@ public class AuthCommand : CommandBase
   [Option("-s|--client-secret", Description = "Client Secret")]
   public required string ClientSecret { get; init; }
 
-  protected ConfigFileProvider ConfigFileProvider => LazyServiceProvider.LazyGetRequiredService<ConfigFileProvider>();
-  protected ImgurService Imgur => LazyServiceProvider.LazyGetRequiredService<ImgurService>();
+  protected ImgurService Imgur => ServiceProvider.GetRequiredService<ImgurService>();
 
 
-  public AuthCommand(IAbpLazyServiceProvider lazyServiceProvider) : base(lazyServiceProvider)
+  public AuthCommand(ILazyServiceProvider serviceProvider) : base(serviceProvider)
   {
   }
 

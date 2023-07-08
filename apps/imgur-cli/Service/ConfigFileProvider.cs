@@ -1,11 +1,8 @@
-using System.Net;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Imgur.API.Models;
-using Microsoft.Extensions.Options;
-using Volo.Abp.DependencyInjection;
-using Volo.Abp.ObjectMapping;
+using MapsterMapper;
 
 namespace Zeeko.ImgurCli.Service;
 
@@ -13,7 +10,7 @@ public class ConfigFileProvider : ISingletonDependency
 {
   public const string ConfigKey = nameof(AppConfig);
 
-  public required IObjectMapper<ImgurCliModule> ObjectMapper { protected get; init; }
+  public IMapper ObjectMapper { protected get; init; }
 
   public static readonly string ConfigDirPath = Path.Join(
     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -28,8 +25,22 @@ public class ConfigFileProvider : ISingletonDependency
       File.WriteAllText(ConfigFilePath, "{}", Encoding.UTF8);
   }
 
-  public AppConfig AppConfig => AppConfigOptions.Value;
-  public required IOptions<AppConfig> AppConfigOptions { get; init; }
+  private readonly Lazy<AppConfig> _lazyAppConfig;
+  public AppConfig AppConfig => _lazyAppConfig.Value;
+
+  public ConfigFileProvider(IMapper objectMapper)
+  {
+    ObjectMapper = objectMapper;
+    _lazyAppConfig = new Lazy<AppConfig>(LoadConfig);
+  }
+
+  private AppConfig LoadConfig()
+  {
+    // read config file as json
+    var configFileContent = File.ReadAllText(ConfigFilePath);
+    var config = JsonSerializer.Deserialize<AppConfig>(configFileContent);
+    return config ?? new AppConfig();
+  }
 
   public void UpdateConfig(AppConfig config)
   {

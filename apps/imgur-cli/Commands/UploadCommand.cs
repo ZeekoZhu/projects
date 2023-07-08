@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using McMaster.Extensions.CommandLineUtils;
 using Spectre.Console;
-using Volo.Abp.DependencyInjection;
 using Zeeko.ImgurCli.Service;
 
 namespace Zeeko.ImgurCli.Commands;
@@ -28,11 +27,11 @@ public class UploadCommand : CommandBase
       "The album id to add the image to. For anonymous albums, {album} should be the deletehash that is returned at creation.")]
   public string? Album { get; init; }
 
-  public UploadCommand(IAbpLazyServiceProvider lazyServiceProvider) : base(lazyServiceProvider)
+  public UploadCommand(ILazyServiceProvider lazyServiceProvider) : base(lazyServiceProvider)
   {
   }
 
-  public ImgurService Imgur => LazyServiceProvider.LazyGetRequiredService<ImgurService>();
+  public ImgurService Imgur => ServiceProvider.GetRequiredService<ImgurService>();
 
   public override async Task<int> OnExecuteAsync(CommandLineApplication app)
   {
