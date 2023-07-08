@@ -12,18 +12,26 @@ public class AuthCommand : CommandBase
   [Option("-s|--client-secret", Description = "Client Secret")]
   public required string ClientSecret { get; init; }
 
-  protected ImgurService Imgur => ServiceProvider.GetRequiredService<ImgurService>();
+  protected ImgurService Imgur =>
+    ServiceProvider.GetRequiredService<ImgurService>();
 
 
-  public AuthCommand(ILazyServiceProvider serviceProvider) : base(serviceProvider)
+  public AuthCommand(ILazyServiceProvider serviceProvider) : base(
+    serviceProvider)
   {
   }
 
   public override async Task<int> OnExecuteAsync(CommandLineApplication app)
   {
-    var clientInfo = new ClientInfo(ClientId, ClientSecret);
+    var clientInfo = new ClientInfo
+      { ClientId = ClientId, ClientSecret = ClientSecret };
     var authUrl = Imgur.GetAuthUrl(clientInfo);
-    Cli.WriteLine(authUrl, new Style(foreground: Color.Green, decoration: Decoration.Underline, link: authUrl));
+    Cli.WriteLine(
+      authUrl,
+      new Style(
+        foreground: Color.Green,
+        decoration: Decoration.Underline,
+        link: authUrl));
     Cli.WriteLine(
       "Open the above URL in your browser and authorize the app, after the redirection, copy the url from address bar and paste it here.");
     var redirectUrl =

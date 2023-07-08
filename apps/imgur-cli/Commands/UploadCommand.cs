@@ -29,26 +29,30 @@ public class UploadCommand : CommandBase
       "The album id to add the image to. For anonymous albums, {album} should be the deletehash that is returned at creation.")]
   public string? Album { get; init; }
 
-  public UploadCommand(ILazyServiceProvider lazyServiceProvider, ConfigFileProvider configFile) : base(
+  public UploadCommand(
+    ILazyServiceProvider lazyServiceProvider,
+    ConfigFileProvider configFile) : base(
     lazyServiceProvider)
   {
     _configFile = configFile;
   }
 
-  public ImgurService Imgur => ServiceProvider.GetRequiredService<ImgurService>();
+  public ImgurService Imgur =>
+    ServiceProvider.GetRequiredService<ImgurService>();
 
   public override async Task<int> OnExecuteAsync(CommandLineApplication app)
   {
-    var file = ResolveFile(FilePath);
-    Logger.LogDebug("Uploading file {FilePath}", file);
-    var progress = new Progress<int>();
     var album = Album ?? _configFile.AppConfig.Settings.DefaultAlbum;
     if (album is null)
     {
       Logger.LogInformation("No album specified, uploading to anonymous album");
     }
 
-    var uploadTask = Imgur.UploadImageAsync(
+    var file = ResolveFile(FilePath);
+    Logger.LogDebug("Uploading file {FilePath} to album {Album}", file, album);
+    var progress = new Progress<int>();
+
+    var uploadResult = await Imgur.UploadImageAsync(
       new UploadImageDto(
         file.OpenRead(),
         FileName ?? file.Name,
@@ -57,19 +61,11 @@ public class UploadCommand : CommandBase
         album),
       progress,
       CancellationToken.None);
-    var uploadResult = await Cli.Progress()
-      .StartAsync(
-        async ctx =>
-        {
-          var task = ctx.AddTask("[green]Uploading...[/]");
-          var fileSize = file.Length;
-          progress.ProgressChanged += (_, args) =>
-          {
-            task.Increment(Math.Ceiling(args / (float)fileSize) * 100);
-          };
-          return await uploadTask;
-        });
-    Cli.MarkupLineInterpolated($"[green]Upload successful![/] [link={uploadResult}]{uploadResult}[/]");
+    Cli.MarkupLineInterpolated(
+      @$"[green]Upload successful![/]
+[blue]Image Url:[/] [link={uploadResult.Link}]{uploadResult.Link}[/]
+[blue]Delete Hash:[/] {uploadResult.DeleteHash}
+");
     return 0;
   }
 

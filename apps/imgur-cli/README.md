@@ -14,4 +14,7 @@ imgur-cli up --clipboard
 imgur-cli up -C
 # upload an image from stdin
 cat <path-to-image> | imgur-cli up --stdin
+
+# set the default album to upload to
+imgur-cli config set-default-album <album-id>
 ```

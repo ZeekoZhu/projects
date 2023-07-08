@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using System.IO.Abstractions.TestingHelpers;
 using System.Text.Json;
 using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Zeeko.ImgurCli.Service;
 
@@ -19,14 +20,24 @@ public class ConfigFileProviderTests
     _fileSystem = new MockFileSystem();
     _filePermissionProvider = Mock.Of<IFilePermissionProvider>();
 
-    _configFileProvider = new ConfigFileProvider(_fileSystem, _filePermissionProvider);
+    _configFileProvider = new ConfigFileProvider(
+      _fileSystem,
+      _filePermissionProvider,
+      NullLogger<ConfigFileProvider>.Instance);
   }
 
   [Test]
   public void LoadConfig_ShouldReturnAppConfig_WhenCalled()
   {
     // Arrange
-    var expectedConfig = new AppConfig { ClientInfo = new ClientInfo("test", "test") };
+    var expectedConfig = new AppConfig
+    {
+      ClientInfo = new ClientInfo
+      {
+        ClientId = "test",
+        ClientSecret = "test"
+      }
+    };
     var json = JsonSerializer.Serialize(expectedConfig);
     _fileSystem.File.WriteAllText(ConfigFileProvider.ConfigFilePath, json);
 
@@ -41,13 +52,21 @@ public class ConfigFileProviderTests
   public void UpdateConfig_ShouldUpdateConfigFile_WhenCalled()
   {
     // Arrange
-    var newConfig = new AppConfig { ClientInfo = new ClientInfo("test", "test update") };
+    var newConfig = new AppConfig
+    {
+      ClientInfo = new ClientInfo
+      {
+        ClientId = "test",
+        ClientSecret = "test"
+      }
+    };
 
     // Act
     _configFileProvider.UpdateConfig(newConfig);
 
     // Assert
-    var configFileContent = _fileSystem.File.ReadAllText(ConfigFileProvider.ConfigFilePath);
+    var configFileContent =
+      _fileSystem.File.ReadAllText(ConfigFileProvider.ConfigFilePath);
     var actualConfig = JsonSerializer.Deserialize<AppConfig>(
       configFileContent,
       new JsonSerializerOptions(JsonSerializerDefaults.Web));
