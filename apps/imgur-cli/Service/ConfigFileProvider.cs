@@ -3,6 +3,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Imgur.API.Models;
 using MapsterMapper;
+// ReSharper disable MemberCanBePrivate.Global
 
 namespace Zeeko.ImgurCli.Service;
 

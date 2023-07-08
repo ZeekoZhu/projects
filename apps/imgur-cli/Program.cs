@@ -1,9 +1,7 @@
 using Mapster;
 using MapsterMapper;
-using Microsoft.Extensions.Configuration;
+using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
@@ -29,46 +27,33 @@ public class Program
 
     try
     {
-      var builder = Host.CreateDefaultBuilder();
+      var services = new ServiceCollection();
+      ConfigureDI(services);
+      ConfigureMapster(services);
 
-      builder.ConfigureServices(
-          (ctx, services) =>
-          {
-            ConfigureDI(services);
-            ConfigureMapster(services);
-            ConfigureAppConfig(services, ctx);
-
-            services.AddSingleton(AnsiConsole.Console);
-            services.AddHttpClient("imgur")
-              .AddHttpMessageHandler(sp => sp.GetRequiredService<LogBodyHandler>());
-            services.AddLogging(loggingBuilder => loggingBuilder.ClearProviders().AddSerilog());
-          })
-        .ConfigureAppConfiguration(
-          b =>
-          {
-            b.SetBasePath(ConfigFileProvider.ConfigDirPath).Sources.Clear();
-            b.AddEnvironmentVariables("DOTNET_");
-          })
-        .UseCommandLineApplication<RootCommand>(args);
+      services.AddSingleton(AnsiConsole.Console);
+      services.AddHttpClient("imgur")
+        .AddHttpMessageHandler(sp => sp.GetRequiredService<LogBodyHandler>());
+      services.AddLogging(loggingBuilder => loggingBuilder.ClearProviders().AddSerilog());
 
 
-      var host = builder.Build();
+      var serviceProvider = services.BuildServiceProvider();
+      var app = new CommandLineApplication<RootCommand>();
+      app.Conventions.UseDefaultConventions().UseConstructorInjection(serviceProvider);
 
-      if (host.Services.GetRequiredService<IHostEnvironment>().IsDevelopment())
+      if (String.Equals(
+            Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT"),
+            "Development",
+            StringComparison.OrdinalIgnoreCase))
       {
         levelSwitch.MinimumLevel = LogEventLevel.Debug;
         appLevelSwitch.MinimumLevel = LogEventLevel.Debug;
       }
 
-      return await host.RunCommandLineApplicationAsync();
+      return await app.ExecuteAsync(args);
     }
     catch (Exception ex)
     {
-      if (ex is HostAbortedException)
-      {
-        throw;
-      }
-
       AnsiConsole.WriteException(ex);
       return 1;
     }
@@ -78,12 +63,6 @@ public class Program
     }
   }
 
-  private static void ConfigureAppConfig(IServiceCollection services, HostBuilderContext ctx)
-  {
-    services.AddSingleton<IFileProvider>(
-      new PhysicalFileProvider(ConfigFileProvider.ConfigDirPath));
-    services.Configure<AppConfig>(ctx.Configuration.GetSection(ConfigFileProvider.ConfigKey));
-  }
 
   private static void ConfigureMapster(IServiceCollection services)
   {
