@@ -21,16 +21,19 @@ jobs:
       - run: npx nx affected -t lint --parallel=3
       - run: npx nx affected -t test --parallel=3 -c=production
       - run: npx nx affected -t build --parallel=3
-      - run: npx nx publish-all imgur-cli -c production
       - uses: actions/upload-artifact@v3
         with:
           name: dist
           path: ./dist
 
-  release:
+  release-imgur-cli:
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
+    # runs only when the git tag matches imgur-cli@*
+    if: startsWith(github.ref, 'refs/tags/imgur-cli@')
     needs: check
+    env:
+      # set the version to the part after `@` in the git tag
+      IMGUR_CLI_VERSION: ${{ replace(github.ref, 'refs/tags/imgur-cli@', '') }}
     steps:
       - uses: actions/checkout@v3
         with:
@@ -41,4 +44,9 @@ jobs:
         with:
           name: dist
           path: ./dist
+      - run: npx nx publish-all imgur-cli -c production
       - run: ./tools/scripts/release_binary.sh imgur-cli
+      - uses: actions/upload-artifact@v3
+        with:
+          name: imgur-cli
+          path: ./dist/publish/imgur-cli
