@@ -1,17 +1,17 @@
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using Imgur.API.Models;
-using MapsterMapper;
+using System.IO.Abstractions;
+using System.Text.Json.Serialization;
+
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace Zeeko.ImgurCli.Service;
 
 public class ConfigFileProvider : ISingletonDependency
 {
-  public const string ConfigKey = nameof(AppConfig);
-
-  public IMapper ObjectMapper { protected get; init; }
+  private IFilePermissionProvider _filePermissionProvider;
+  private readonly IFileSystem _fs; // Add this line
 
   public static readonly string ConfigDirPath = Path.Join(
     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
@@ -19,81 +19,60 @@ public class ConfigFileProvider : ISingletonDependency
 
   public static string ConfigFilePath => Path.Join(ConfigDirPath, "appsettings.json");
 
-  static ConfigFileProvider()
-  {
-    Directory.CreateDirectory(ConfigDirPath);
-    if (!File.Exists(ConfigFilePath))
-      File.WriteAllText(ConfigFilePath, "{}", Encoding.UTF8);
-  }
-
   private readonly Lazy<AppConfig> _lazyAppConfig;
   public AppConfig AppConfig => _lazyAppConfig.Value;
 
-  public ConfigFileProvider(IMapper objectMapper)
+  public ConfigFileProvider(IFileSystem fs, IFilePermissionProvider filePermissionProvider)
   {
-    ObjectMapper = objectMapper;
+    _fs = fs;
+    _filePermissionProvider = filePermissionProvider;
     _lazyAppConfig = new Lazy<AppConfig>(LoadConfig);
+    fs.Directory.CreateDirectory(ConfigDirPath);
+    if (fs.File.Exists(ConfigFilePath))
+    {
+      return;
+    }
+
+    fs.File.WriteAllText(ConfigFilePath, "{}", Encoding.UTF8);
+    _filePermissionProvider.RestrictFilePermissions(ConfigFilePath);
   }
 
   private AppConfig LoadConfig()
   {
     // read config file as json
-    var configFileContent = File.ReadAllText(ConfigFilePath);
+    var configFileContent = _fs.File.ReadAllText(ConfigFilePath);
     var config = JsonSerializer.Deserialize<AppConfig>(configFileContent);
     return config ?? new AppConfig();
   }
 
   public void UpdateConfig(AppConfig config)
   {
-    // serialize AppConfig into json dom
-    var dom = JsonSerializer.SerializeToNode(config);
-    if (config.Token is not null)
-    {
-      var tokenDom = JsonSerializer.SerializeToNode(ObjectMapper.Map<OAuth2Token, AppAuthToken>(config.Token));
-      dom![nameof(Service.AppConfig.Token)] = tokenDom;
-    }
-
-    // read config file as json dom
-    var configFileContent = File.ReadAllText(ConfigFilePath);
-    var configDom = JsonNode.Parse(configFileContent);
-    // update the AppConfig section
-    if (configDom != null)
-    {
-      configDom[ConfigKey] = dom;
-      var content =
-        configDom.ToJsonString(new JsonSerializerOptions(JsonSerializerDefaults.Web) { WriteIndented = true });
-      File.WriteAllText(ConfigFilePath, content, Encoding.UTF8);
-      // change file permission to current user only
-      RestrictConfigFileAccess();
-    }
-    else
-    {
-      // create a new config file
-      File.WriteAllText(ConfigFilePath, "{}", Encoding.UTF8);
-    }
-  }
-
-  private void RestrictConfigFileAccess()
-  {
-    var filePath = ConfigFilePath;
-    switch (Environment.OSVersion.Platform)
-    {
-      case PlatformID.Unix:
-      case PlatformID.MacOSX:
-#pragma warning disable CA1416
-        File.SetUnixFileMode(filePath, UnixFileMode.UserRead | UnixFileMode.UserWrite);
-#pragma warning restore CA1416
-        break;
-    }
+    // write config file as json
+    var json = JsonSerializer.Serialize(
+      config,
+      new JsonSerializerOptions(JsonSerializerDefaults.Web) { WriteIndented = true });
+    _fs.File.WriteAllText(ConfigFilePath, json, Encoding.UTF8);
   }
 }
 
-public record ClientInfo(string ClientId, string ClientSecret);
+public record ClientInfo
+{
+  [JsonConstructor]
+  public ClientInfo(string ClientId, string ClientSecret)
+  {
+    this.ClientId = ClientId;
+    this.ClientSecret = ClientSecret;
+  }
+
+  public string ClientId { get; init; }
+  public string ClientSecret { get; init; }
+}
 
 public record AppConfig
 {
   public OAuth2Token? Token { get; set; }
   public ClientInfo? ClientInfo { get; set; }
+  public AppSettings Settings { get; set; } = new();
 }
 
 public class AppAuthToken : IOAuth2Token
@@ -104,4 +83,12 @@ public class AppAuthToken : IOAuth2Token
   public required string RefreshToken { get; init; }
   public required int AccountId { get; init; }
   public required string AccountUsername { get; init; }
+}
+
+/// <summary>
+/// </summary>
+public class AppSettings
+{
+  /// <summary>The default album to upload to.</summary>
+  public string? DefaultAlbum { get; init; }
 }

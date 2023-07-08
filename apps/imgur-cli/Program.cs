@@ -1,3 +1,4 @@
+using System.IO.Abstractions;
 using Mapster;
 using MapsterMapper;
 using McMaster.Extensions.CommandLineUtils;
@@ -35,6 +36,7 @@ public class Program
       services.AddHttpClient("imgur")
         .AddHttpMessageHandler(sp => sp.GetRequiredService<LogBodyHandler>());
       services.AddLogging(loggingBuilder => loggingBuilder.ClearProviders().AddSerilog());
+      services.AddSingleton<IFileSystem, FileSystem>();
 
 
       var serviceProvider = services.BuildServiceProvider();

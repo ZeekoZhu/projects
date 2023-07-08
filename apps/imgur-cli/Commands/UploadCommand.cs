@@ -7,6 +7,8 @@ namespace Zeeko.ImgurCli.Commands;
 
 public class UploadCommand : CommandBase
 {
+  private readonly ConfigFileProvider _configFile;
+
   [Required]
   [FileExists]
   [Option("-f|--file", Description = "The image file to upload")]
@@ -27,8 +29,10 @@ public class UploadCommand : CommandBase
       "The album id to add the image to. For anonymous albums, {album} should be the deletehash that is returned at creation.")]
   public string? Album { get; init; }
 
-  public UploadCommand(ILazyServiceProvider lazyServiceProvider) : base(lazyServiceProvider)
+  public UploadCommand(ILazyServiceProvider lazyServiceProvider, ConfigFileProvider configFile) : base(
+    lazyServiceProvider)
   {
+    _configFile = configFile;
   }
 
   public ImgurService Imgur => ServiceProvider.GetRequiredService<ImgurService>();
@@ -38,8 +42,19 @@ public class UploadCommand : CommandBase
     var file = ResolveFile(FilePath);
     Logger.LogDebug("Uploading file {FilePath}", file);
     var progress = new Progress<int>();
+    var album = Album ?? _configFile.AppConfig.Settings.DefaultAlbum;
+    if (album is null)
+    {
+      Logger.LogInformation("No album specified, uploading to anonymous album");
+    }
+
     var uploadTask = Imgur.UploadImageAsync(
-      new UploadImageDto(file.OpenRead(), FileName ?? file.Name, Title, Description, Album),
+      new UploadImageDto(
+        file.OpenRead(),
+        FileName ?? file.Name,
+        Title,
+        Description,
+        album),
       progress,
       CancellationToken.None);
     var uploadResult = await Cli.Progress()
