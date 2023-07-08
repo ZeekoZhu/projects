@@ -3,6 +3,7 @@ using Imgur.API.Authentication;
 using Imgur.API.Endpoints;
 using Imgur.API.Models;
 using MapsterMapper;
+using Zeeko.ImgurCli.Dto;
 
 namespace Zeeko.ImgurCli.Service;
 
@@ -42,7 +43,9 @@ public class ImgurService : ITransientDependency
 
   public string GetAuthUrl(ClientInfo? clientInfo)
   {
-    Logger.LogDebug("get auth url with client info: {ClientInfo}", clientInfo);
+    Logger.LogDebug(
+      "get auth url with client info: {ClientInfo}",
+      clientInfo);
     var finalClientInfo = clientInfo ?? ClientInfo;
     var apiClient = new ApiClient(
       finalClientInfo.ClientId,
@@ -91,7 +94,8 @@ public class ImgurService : ITransientDependency
       finalClientInfo.ClientSecret);
     var oAuth2Endpoint = new OAuth2Endpoint(apiClient, HttpClient);
     var newToken =
-      await oAuth2Endpoint.GetTokenAsync(authToken.RefreshToken) as OAuth2Token;
+      await oAuth2Endpoint.GetTokenAsync(authToken.RefreshToken) as
+        OAuth2Token;
     ConfigFileProvider.UpdateConfig(
       ConfigFileProvider.AppConfig with
       {
@@ -105,12 +109,11 @@ public class ImgurService : ITransientDependency
     IProgress<int> progress,
     CancellationToken cancellationToken)
   {
-    var apiClient = new ApiClient(ClientInfo.ClientId, ClientInfo.ClientSecret);
+    var apiClient = CreateApiClient();
     Logger.LogDebug(
       "upload image with {@ClientInfo} {@Token}",
       ClientInfo,
       Token);
-    apiClient.SetOAuth2Token(Token);
     var imgEndpoint = new ImageEndpoint(apiClient, HttpClient);
     var resp = await imgEndpoint.UploadImageAsync(
       dto.ImageStream,
@@ -123,17 +126,20 @@ public class ImgurService : ITransientDependency
       cancellationToken);
     return _mapper.Map<UploadResultDto>(resp);
   }
-}
 
-public record UploadResultDto
-{
-  public required string Link { get; init; }
-  public required string DeleteHash { get; init; }
-}
+  private ApiClient CreateApiClient()
+  {
+    var apiClient = new ApiClient(
+      ClientInfo.ClientId,
+      ClientInfo.ClientSecret);
+    apiClient.SetOAuth2Token(Token);
+    return apiClient;
+  }
 
-public record UploadImageDto(
-  Stream ImageStream,
-  string FileName,
-  string? Title,
-  string? Description,
-  string? AlbumHash);
+  public async Task DeleteImageAsync(string hash)
+  {
+    var apiClient = CreateApiClient();
+    var imgEndpoint = new ImageEndpoint(apiClient, HttpClient);
+    await imgEndpoint.DeleteImageAsync(hash);
+  }
+}

@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using McMaster.Extensions.CommandLineUtils;
 using Spectre.Console;
+using Zeeko.ImgurCli.Dto;
 using Zeeko.ImgurCli.Service;
 
 namespace Zeeko.ImgurCli.Commands;

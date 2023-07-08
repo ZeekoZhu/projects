@@ -3,7 +3,11 @@ using Zeeko.ImgurCli.Service;
 
 namespace Zeeko.ImgurCli.Commands;
 
-[Subcommand(typeof(AuthCommand), typeof(UploadCommand), typeof(ConfigCommand))]
+[Subcommand(
+  typeof(AuthCommand),
+  typeof(UploadCommand),
+  typeof(ConfigCommand),
+  typeof(DeleteCommand))]
 public class RootCommand : CommandBase
 {
   public override Task<int> OnExecuteAsync(CommandLineApplication app)
@@ -12,7 +16,8 @@ public class RootCommand : CommandBase
     return Task.FromResult(0);
   }
 
-  public RootCommand(LazyServiceProvider lazyServiceProvider) : base(lazyServiceProvider)
+  public RootCommand(LazyServiceProvider lazyServiceProvider) : base(
+    lazyServiceProvider)
   {
   }
 }
