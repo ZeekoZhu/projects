@@ -8,6 +8,7 @@
     <PublishSingleFile>true</PublishSingleFile>
     <RootNamespace>Zeeko.ImgurCli</RootNamespace>
     <AssemblyName>imgur-cli</AssemblyName>
+    <InformationalVersion>$(IMGUR_CLI_VERSION)</InformationalVersion>
   </PropertyGroup>
 
   <Import Project="..\..\common.props" />

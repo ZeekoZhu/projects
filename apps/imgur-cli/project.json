@@ -18,7 +18,12 @@
         "production": {
           "configuration": "Release"
         }
-      }
+      },
+      "inputs": [
+        {
+          "env": "IMGUR_CLI_VERSION"
+        }
+      ]
     },
     "publish": {
       "executor": "@nx-dotnet/core:publish",
