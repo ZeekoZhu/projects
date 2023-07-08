@@ -99,7 +99,8 @@ public class ImgurService : ITransientDependency
     ConfigFileProvider.UpdateConfig(
       ConfigFileProvider.AppConfig with
       {
-        ClientInfo = finalClientInfo, Token = newToken
+        ClientInfo = finalClientInfo,
+        Token = newToken
       });
     Logger.LogDebug("new token saved: {@NewToken}", newToken);
   }

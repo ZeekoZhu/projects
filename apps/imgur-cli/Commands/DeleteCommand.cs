@@ -4,7 +4,7 @@ using Zeeko.ImgurCli.Service;
 
 namespace Zeeko.ImgurCli.Commands;
 
-public class DeleteCommand: CommandBase
+public class DeleteCommand : CommandBase
 {
   private readonly ImgurService _imgur;
 

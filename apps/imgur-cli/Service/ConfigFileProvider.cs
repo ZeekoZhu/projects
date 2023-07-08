@@ -23,7 +23,7 @@ public class ConfigFileProvider : ISingletonDependency
 
   private static readonly JsonSerializerOptions JSONSerializerOptions =
     new(JsonSerializerDefaults.Web)
-      { WriteIndented = true };
+    { WriteIndented = true };
 
   public AppConfig AppConfig => _lazyAppConfig.Value;
   private ILogger<ConfigFileProvider> _logger;

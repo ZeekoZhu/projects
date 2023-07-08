@@ -24,7 +24,7 @@ public class AuthCommand : CommandBase
   public override async Task<int> OnExecuteAsync(CommandLineApplication app)
   {
     var clientInfo = new ClientInfo
-      { ClientId = ClientId, ClientSecret = ClientSecret };
+    { ClientId = ClientId, ClientSecret = ClientSecret };
     var authUrl = Imgur.GetAuthUrl(clientInfo);
     Cli.WriteLine(
       authUrl,
