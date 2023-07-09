@@ -23,7 +23,8 @@ public class LogBodyHandler : DelegatingHandler, ITransientDependency
     if (request.Content?.Headers.ContentType?.MediaType == "application/json")
     {
       // read the request body
-      string requestBody = await request.Content.ReadAsStringAsync(cancellationToken);
+      string requestBody =
+        await request.Content.ReadAsStringAsync(cancellationToken);
       // log the request body
       _logger.LogDebug("Request Body: {RequestBody}", requestBody);
     }
@@ -38,7 +39,8 @@ public class LogBodyHandler : DelegatingHandler, ITransientDependency
     }
 
     // read the response body
-    string responseBody = await resp.Content.ReadAsStringAsync(cancellationToken);
+    string responseBody =
+      await resp.Content.ReadAsStringAsync(cancellationToken);
     // log the response body
     _logger.LogDebug("Response Body: {ResponseBody}", responseBody);
 

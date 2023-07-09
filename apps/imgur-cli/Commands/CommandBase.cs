@@ -11,9 +11,11 @@ public abstract class CommandBase : ITransientDependency
   protected ILazyServiceProvider ServiceProvider { get; }
 
   protected ILogger Logger =>
-    ServiceProvider.GetRequiredService<ILogger>(sp => sp.GetRequiredService<ILoggerFactory>().CreateLogger(GetType()));
+    ServiceProvider.GetRequiredService<ILogger>(
+      sp => sp.GetRequiredService<ILoggerFactory>().CreateLogger(GetType()));
 
-  protected IAnsiConsole Cli => ServiceProvider.GetRequiredService<IAnsiConsole>();
+  protected IAnsiConsole Cli =>
+    ServiceProvider.GetRequiredService<IAnsiConsole>();
 
   public CommandBase(ILazyServiceProvider serviceProvider)
   {

@@ -11,7 +11,10 @@ public class DeleteCommand : CommandBase
   [Required]
   [Argument(0, "imageHash", "The hash of the image to delete")]
   public required string Hash { get; set; }
-  public DeleteCommand(ILazyServiceProvider serviceProvider, ImgurService imgur) : base(serviceProvider)
+
+  public DeleteCommand(
+    ILazyServiceProvider serviceProvider,
+    ImgurService imgur) : base(serviceProvider)
   {
     _imgur = imgur;
   }

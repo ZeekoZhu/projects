@@ -76,7 +76,8 @@ public class UploadCommand : CommandBase
     if (album is not null)
     {
       var albumUrl = $"https://imgur.com/a/{album}";
-      Cli.MarkupLineInterpolated($"[blue]Album Url:[/] [link={albumUrl}]{albumUrl}[/]");
+      Cli.MarkupLineInterpolated(
+        $"[blue]Album Url:[/] [link={albumUrl}]{albumUrl}[/]");
     }
 
     Cli.MarkupLineInterpolated(

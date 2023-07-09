@@ -5,7 +5,8 @@ public interface IFilePermissionProvider
   public void RestrictFilePermissions(string path);
 }
 
-public class FilePermissionProvider : IFilePermissionProvider, ITransientDependency
+public class FilePermissionProvider : IFilePermissionProvider,
+  ITransientDependency
 {
   public void RestrictFilePermissions(string path)
   {
@@ -14,7 +15,9 @@ public class FilePermissionProvider : IFilePermissionProvider, ITransientDepende
       case PlatformID.Unix:
       case PlatformID.MacOSX:
 #pragma warning disable CA1416
-        File.SetUnixFileMode(path, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+        File.SetUnixFileMode(
+          path,
+          UnixFileMode.UserRead | UnixFileMode.UserWrite);
 #pragma warning restore CA1416
         break;
     }

@@ -5,7 +5,9 @@ namespace Zeeko.ImgurCli.Service;
 public class LazyServiceProvider : ILazyServiceProvider
 {
   private readonly IServiceProvider _serviceProvider;
-  private readonly ConcurrentDictionary<Type, Lazy<object?>> _cachedServices = new();
+
+  private readonly ConcurrentDictionary<Type, Lazy<object?>> _cachedServices =
+    new();
 
   public LazyServiceProvider(IServiceProvider serviceProvider)
   {
@@ -14,7 +16,10 @@ public class LazyServiceProvider : ILazyServiceProvider
 
   public object? GetService(Type serviceType)
   {
-    return _cachedServices.GetOrAdd(serviceType, type => new Lazy<object?>(_serviceProvider.GetService(type))).Value;
+    return _cachedServices.GetOrAdd(
+        serviceType,
+        type => new Lazy<object?>(_serviceProvider.GetService(type)))
+      .Value;
   }
 
   public T? GetService<T>()
@@ -27,7 +32,8 @@ public class LazyServiceProvider : ILazyServiceProvider
     var result = GetService<T>();
     if (result is null)
     {
-      throw new InvalidOperationException($"Service of type {typeof(T)} is not registered");
+      throw new InvalidOperationException(
+        $"Service of type {typeof(T)} is not registered");
     }
 
     return result;
@@ -35,14 +41,18 @@ public class LazyServiceProvider : ILazyServiceProvider
 
   public T? GetService<T>(Func<IServiceProvider, T> factory)
   {
-    return (T?)_cachedServices.GetOrAdd(typeof(T), _ => new Lazy<object?>(() => factory(_serviceProvider))).Value;
+    return (T?)_cachedServices.GetOrAdd(
+        typeof(T),
+        _ => new Lazy<object?>(() => factory(_serviceProvider)))
+      .Value;
   }
 
   public T GetRequiredService<T>(Func<IServiceProvider, T> factory)
   {
     return GetService(factory) switch
     {
-      null => throw new InvalidOperationException($"Service of type {typeof(T)} is not registered"),
+      null => throw new InvalidOperationException(
+        $"Service of type {typeof(T)} is not registered"),
       var result => result
     };
   }

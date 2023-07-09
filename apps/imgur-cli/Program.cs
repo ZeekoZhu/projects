@@ -35,13 +35,15 @@ public class Program
       services.AddSingleton(AnsiConsole.Console);
       services.AddHttpClient("imgur")
         .AddHttpMessageHandler(sp => sp.GetRequiredService<LogBodyHandler>());
-      services.AddLogging(loggingBuilder => loggingBuilder.ClearProviders().AddSerilog());
+      services.AddLogging(
+        loggingBuilder => loggingBuilder.ClearProviders().AddSerilog());
       services.AddSingleton<IFileSystem, FileSystem>();
 
 
       var serviceProvider = services.BuildServiceProvider();
       var app = new CommandLineApplication<RootCommand>();
-      app.Conventions.UseDefaultConventions().UseConstructorInjection(serviceProvider);
+      app.Conventions.UseDefaultConventions()
+        .UseConstructorInjection(serviceProvider);
 
       if (String.Equals(
             Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT"),
