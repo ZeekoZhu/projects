@@ -1,6 +1,22 @@
 # imgur-cli
 
-A simple command line interface for uploading images to imgur.
+A simple command line interface for uploading images to your imgur account.
+
+## Installation
+
+### AUR
+
+```sh
+yay -S imgur-cli
+```
+
+### Binaries
+
+Download the latest binary from the [releases page](https://github.com/ZeekoZhu/projects/releases).
+
+### From Source
+
+See [Development](#development) for instructions on how to build from source.
 
 ## Usage
 
@@ -36,5 +52,5 @@ nx publish-all imgur-cli
 
 # create a new release
 IMGUR_CLI_VERSION=<version>
-./tools/scripts/gh_release.sh imgur-cli $IMGUR_CLI_VERSION
+./tools/scripts/gh_release.sh imgur-cli IMGUR_CLI_VERSION
 ```
