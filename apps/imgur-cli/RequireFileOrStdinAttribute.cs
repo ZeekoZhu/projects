@@ -11,10 +11,10 @@ public class RequireFileOrStdinAttribute : ValidationAttribute
   {
     return value switch
     {
-      UploadCommand { IsFromStdin: false, FileName: null } => new
-        ValidationResult("Must specify file name when not reading from stdin"),
-      UploadCommand { IsFromStdin: true, FileName: not null } => new
-        ValidationResult("Cannot specify file name when reading from stdin"),
+      UploadCommand { IsFromStdin: false, FilePath: null } => new
+        ValidationResult("Must specify image file when not reading from stdin"),
+      UploadCommand { IsFromStdin: true, FilePath: not null } => new
+        ValidationResult("Cannot specify image file when reading from stdin"),
       _ => ValidationResult.Success
     };
   }
