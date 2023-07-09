@@ -1,0 +1,6 @@
+./dist/apps/imgur-cli/net7.0/linux-x64/imgur-cli
+auth
+config
+config set-default-album
+upload
+delete

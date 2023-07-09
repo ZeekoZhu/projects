@@ -13,5 +13,7 @@
 pkg/
 src/
 
-**/*
-!**/PKGBUILD
+*
+!PKGBUILD
+!imgur-cli.fish
+!.gitignore

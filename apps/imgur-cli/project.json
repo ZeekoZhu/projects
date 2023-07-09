@@ -36,7 +36,9 @@
           "configuration": "Release"
         }
       },
-      "dependsOn": ["build"]
+      "dependsOn": [
+        "build"
+      ]
     },
     "publish-all": {
       "executor": "nx:run-commands",
