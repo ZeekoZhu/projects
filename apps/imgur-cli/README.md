@@ -54,3 +54,9 @@ nx publish-all imgur-cli
 IMGUR_CLI_VERSION=<version>
 ./tools/scripts/gh_release.sh imgur-cli IMGUR_CLI_VERSION
 ```
+
+## WIP
+
+Improve startup performance
+- [ ] use System.CommandLine
+- [ ] reduce the usage of DI
