@@ -1,0 +1,10 @@
+﻿[
+  {
+    "Path": "./Lenovo/J716F/res/values/arrays.xml",
+    "Problems": [
+      {
+        "NonExistingAttribute": "carrier_properties"
+      }
+    ]
+  }
+]
