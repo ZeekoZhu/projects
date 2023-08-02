@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImgurCli", "apps\imgur-cli\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImgurCli.Test", "apps\imgur-cli-test\ImgurCli.Test.csproj", "{31528DCF-29C0-4175-A7E9-6638B10F21EE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GsiOverlayTool", "apps\gsi-overlay-tool\GsiOverlayTool.csproj", "{625B6671-EC7B-4F42-8C09-FC1717BDF12C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GsiOverlayTool.Test", "apps\gsi-overlay-tool-test\GsiOverlayTool.Test.csproj", "{6FC42BD0-15D7-4EF6-B48D-214E8C91BF86}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -26,9 +30,19 @@ Global
 		{31528DCF-29C0-4175-A7E9-6638B10F21EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{31528DCF-29C0-4175-A7E9-6638B10F21EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{31528DCF-29C0-4175-A7E9-6638B10F21EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{625B6671-EC7B-4F42-8C09-FC1717BDF12C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{625B6671-EC7B-4F42-8C09-FC1717BDF12C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{625B6671-EC7B-4F42-8C09-FC1717BDF12C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{625B6671-EC7B-4F42-8C09-FC1717BDF12C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FC42BD0-15D7-4EF6-B48D-214E8C91BF86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FC42BD0-15D7-4EF6-B48D-214E8C91BF86}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FC42BD0-15D7-4EF6-B48D-214E8C91BF86}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FC42BD0-15D7-4EF6-B48D-214E8C91BF86}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C1664E5D-17FA-4B1D-ABCB-9F26242B73BC} = {7CC57615-BF02-46B8-A8A9-5F8B2BAD3171}
 		{31528DCF-29C0-4175-A7E9-6638B10F21EE} = {7CC57615-BF02-46B8-A8A9-5F8B2BAD3171}
+		{625B6671-EC7B-4F42-8C09-FC1717BDF12C} = {7CC57615-BF02-46B8-A8A9-5F8B2BAD3171}
+		{6FC42BD0-15D7-4EF6-B48D-214E8C91BF86} = {7CC57615-BF02-46B8-A8A9-5F8B2BAD3171}
 	EndGlobalSection
 EndGlobal
