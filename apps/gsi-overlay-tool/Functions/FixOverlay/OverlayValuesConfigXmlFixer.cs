@@ -1,6 +1,6 @@
 using System.Xml.Linq;
 
-namespace GsiOverlayTool;
+namespace GsiOverlayTool.Functions.FixOverlay;
 
 public class OverlayValuesConfigXmlFixer
 {

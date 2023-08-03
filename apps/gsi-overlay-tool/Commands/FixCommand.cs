@@ -1,10 +1,11 @@
 using System.CommandLine;
 using System.Xml;
 using System.Xml.Linq;
+using GsiOverlayTool.Functions.FixOverlay;
 
-namespace GsiOverlayTool;
+namespace GsiOverlayTool.Commands;
 
-static class FixCommand
+internal static class FixCommand
 {
   public static void AddFixCommand(this Command rootCmd)
   {

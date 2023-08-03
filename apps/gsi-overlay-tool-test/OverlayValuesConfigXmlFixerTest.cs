@@ -1,5 +1,6 @@
 using System.Xml.Linq;
 using FluentAssertions;
+using GsiOverlayTool.Functions.FixOverlay;
 using Snapshooter.NUnit;
 
 namespace GsiOverlayTool.Test;
@@ -129,6 +130,6 @@ public class OverlayValuesConfigXmlFixerTest
     result.Should().NotContain("config_showDefaultAssistant");
     result.Should().NotContain("config_showDefaultEmergency");
     result.MatchSnapshot();
-    
+
   }
 }

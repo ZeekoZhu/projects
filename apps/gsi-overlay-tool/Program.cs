@@ -2,6 +2,7 @@
 
 using System.CommandLine;
 using GsiOverlayTool;
+using GsiOverlayTool.Commands;
 
 var rootCmd = new RootCommand("GSI Overlay Tool");
 

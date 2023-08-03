@@ -1,6 +1,7 @@
 using System.Text;
 using System.Text.Unicode;
 using FluentAssertions;
+using GsiOverlayTool.Functions.FixOverlay;
 using Snapshooter.NUnit;
 
 namespace GsiOverlayTool.Test;

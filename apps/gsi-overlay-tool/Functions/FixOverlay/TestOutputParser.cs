@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace GsiOverlayTool;
+namespace GsiOverlayTool.Functions.FixOverlay;
 
 // example output:
 // Fatal: ./Lenovo/J716F/res/values/arrays.xml: defines a non-existing attribute emailAddressTypes
