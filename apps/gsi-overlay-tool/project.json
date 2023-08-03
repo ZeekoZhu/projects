@@ -31,6 +31,22 @@
         }
       }
     },
+    "publish": {
+      "executor": "@nx-dotnet/core:publish",
+      "outputs": [
+        "{workspaceRoot}/dist/publish/gsi-overlay-tool"
+      ],
+      "options": {
+        "configuration": "Debug",
+        "noBuild": true,
+        "output": "dist/publish/gsi-overlay-tool"
+      },
+      "configurations": {
+        "production": {
+          "configuration": "Release"
+        }
+      }
+    },
     "lint": {
       "executor": "@nx-dotnet/core:format"
     }
