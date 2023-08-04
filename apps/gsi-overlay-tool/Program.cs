@@ -7,5 +7,6 @@ using GsiOverlayTool.Commands;
 var rootCmd = new RootCommand("GSI Overlay Tool");
 
 rootCmd.AddFixCommand();
+rootCmd.AddDumpFileTreeCommand();
 
 return await rootCmd.InvokeAsync(args);

@@ -26,4 +26,10 @@
     <Folder Include="__snapshots__\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="fixtures\**\*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

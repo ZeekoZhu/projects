@@ -18,5 +18,7 @@ internal static class DumpFileTreeCommand
         "output-file",
         "The output file to write the tree to")
     };
+    dumpFileTreeCommand.AddAlias("dft");
+    command.Add(dumpFileTreeCommand);
   }
 }
