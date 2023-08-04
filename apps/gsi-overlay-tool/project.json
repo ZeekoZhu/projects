@@ -24,7 +24,7 @@
     "serve": {
       "executor": "@nx-dotnet/core:serve",
       "options": {
-        "configuration": "Debug"
+        "configuration": "Debug",
       },
       "configurations": {
         "production": {
@@ -41,7 +41,8 @@
       "options": {
         "configuration": "Debug",
         "noBuild": true,
-        "output": "dist/publish/gsi-overlay-tool"
+        "output": "dist/publish/gsi-overlay-tool",
+        "runtime": "linux-x64"
       },
       "configurations": {
         "production": {
