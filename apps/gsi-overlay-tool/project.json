@@ -12,7 +12,8 @@
       ],
       "options": {
         "configuration": "Debug",
-        "noDependencies": true
+        "noDependencies": true,
+        "extraParameters": "--runtime linux-x64"
       },
       "configurations": {
         "production": {
@@ -36,6 +37,7 @@
       "outputs": [
         "{workspaceRoot}/dist/publish/gsi-overlay-tool"
       ],
+      "dependsOn": ["build"],
       "options": {
         "configuration": "Debug",
         "noBuild": true,
