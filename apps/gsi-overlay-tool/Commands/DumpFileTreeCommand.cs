@@ -5,7 +5,7 @@ namespace GsiOverlayTool.Commands;
 
 internal static class DumpFileTreeCommand
 {
-  public static void AddDumpFileTreeCommand(this Command command)
+  private static void AddDumpCommand(Command command)
   {
     var rootDirArg = new Argument<DirectoryInfo>(
       "root-dir",
@@ -15,13 +15,12 @@ internal static class DumpFileTreeCommand
       "output-file",
       "The output file to write the tree to");
     var dumpFileTreeCommand = new Command(
-      "dump-file-tree",
+      "dump",
       "Dump file tree of a directory")
     {
       rootDirArg,
       outFileArg
     };
-    dumpFileTreeCommand.AddAlias("dft");
     dumpFileTreeCommand.SetHandler(
       ctx =>
       {
@@ -30,5 +29,15 @@ internal static class DumpFileTreeCommand
         FileTreeDump.Dump(rootDir, outFile);
       });
     command.Add(dumpFileTreeCommand);
+  }
+
+  public static void AddFileTreeCommand(this Command command)
+  {
+    var fileTreeCommand = new Command(
+      "file-tree",
+      "File tree related commands");
+    fileTreeCommand.AddAlias("ft");
+    AddDumpCommand(fileTreeCommand);
+    command.Add(fileTreeCommand);
   }
 }
