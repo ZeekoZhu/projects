@@ -18,13 +18,17 @@
       "configurations": {
         "production": {
           "configuration": "Release"
+        },
+        "android": {
+          "configuration": "Release",
+          "extraParameters": "--runtime linux-bionic-arm64"
         }
       }
     },
     "serve": {
       "executor": "@nx-dotnet/core:serve",
       "options": {
-        "configuration": "Debug",
+        "configuration": "Debug"
       },
       "configurations": {
         "production": {
@@ -37,7 +41,9 @@
       "outputs": [
         "{workspaceRoot}/dist/publish/gsi-overlay-tool"
       ],
-      "dependsOn": ["build"],
+      "dependsOn": [
+        "build"
+      ],
       "options": {
         "configuration": "Debug",
         "noBuild": true,
@@ -47,6 +53,10 @@
       "configurations": {
         "production": {
           "configuration": "Release"
+        },
+        "android": {
+          "configuration": "Release",
+          "runtime": "linux-bionic-arm64"
         }
       }
     },
