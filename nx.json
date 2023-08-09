@@ -2,8 +2,10 @@
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "tasksRunnerOptions": {
     "default": {
-      "runner": "nx/tasks-runners/default",
+      "runner": "nx-remotecache-minio",
       "options": {
+        "bucket": "projects",
+        "region": "auto",
         "cacheableOperations": ["build", "lint", "test", "e2e"]
       }
     }

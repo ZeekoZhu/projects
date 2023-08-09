@@ -3,14 +3,16 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "prepare": "nx g @nx-dotnet/core:restore"
+    "prepare": "nx g @nx-dotnet/core:restore && husky install"
   },
   "private": true,
   "devDependencies": {
-    "@nrwl/js": "16.4.2",
+    "@nrwl/js": "16.6.0",
     "@nx-dotnet/core": "^1.22.0",
-    "@nx/workspace": "16.4.2",
-    "nx": "16.4.2",
+    "@nx/workspace": "16.6.0",
+    "husky": "^8.0.0",
+    "nx": "16.6.0",
+    "nx-remotecache-minio": "^4.2.0",
     "prettier": "^2.8.8",
     "zx": "^7.2.3"
   }

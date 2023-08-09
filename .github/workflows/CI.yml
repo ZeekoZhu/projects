@@ -10,6 +10,10 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      NXCACHE_MINIO_URL: ${{ secrets.NXCACHE_MINIO_URL }}
+      NXCACHE_MINIO_SECRET_KEY: ${{ secrets.NXCACHE_MINIO_SECRET_KEY }}
+      NXCACHE_MINIO_ACCESS_KEY: ${{ secrets.NXCACHE_MINIO_ACCESS_KEY }}
     steps:
       - uses: actions/checkout@v3
         with:
