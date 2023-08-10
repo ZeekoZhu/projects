@@ -38,6 +38,7 @@ public class AuthCommand : CommandBase
       Cli.Ask<string>("> ");
     await Imgur.RefreshTokenAsync(clientInfo, redirectUrl);
     Cli.MarkupLineInterpolated($"[green]Login successful![/]");
+    // foo bar
     return 0;
   }
 }
