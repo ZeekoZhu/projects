@@ -26,6 +26,13 @@ jobs:
       - run: npx nx affected -t test --parallel=3 -c=production
       - run: npx nx affected -t build --parallel=3
       - uses: actions/upload-artifact@v3
+        name: upload nx cache for debugging
+        if: always()
+        with:
+          name: nx-cache
+          path: ./node_modules/.cache/nx
+      - uses: actions/upload-artifact@v3
+        name: upload dist
         with:
           name: dist
           path: ./dist
