@@ -12,7 +12,8 @@
       ],
       "options": {
         "configuration": "Debug",
-        "noDependencies": true
+        "no-dependencies": true,
+        "no-restore": true
       },
       "configurations": {
         "production": {
@@ -29,7 +30,8 @@
       "executor": "@nx-dotnet/core:publish",
       "options": {
         "configuration": "Debug",
-        "noDependencies": true
+        "noDependencies": true,
+        "noRestore": true
       },
       "configurations": {
         "production": {
