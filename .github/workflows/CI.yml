@@ -31,8 +31,3 @@ jobs:
         with:
           name: nx-cache
           path: ./node_modules/.cache/nx
-      - uses: actions/upload-artifact@v3
-        name: upload dist
-        with:
-          name: dist
-          path: ./dist
