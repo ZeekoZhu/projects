@@ -10,10 +10,16 @@
     "@nrwl/js": "16.6.0",
     "@nx-dotnet/core": "^1.22.0",
     "@nx/workspace": "16.6.0",
+    "cz-git": "^1.7.1",
     "husky": "^8.0.0",
     "nx": "16.6.0",
     "nx-remotecache-minio": "^4.2.0",
     "prettier": "^2.8.8",
     "zx": "^7.2.3"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-git"
+    }
   }
 }

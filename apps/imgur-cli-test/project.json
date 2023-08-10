@@ -12,7 +12,8 @@
       ],
       "options": {
         "configuration": "Debug",
-        "noDependencies": true
+        "no-dependencies": true,
+        "no-restore": true
       },
       "configurations": {
         "production": {
