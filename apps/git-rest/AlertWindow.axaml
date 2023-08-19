@@ -6,8 +6,9 @@
         x:Class="GitRest.AlertWindow"
         Title="AlertWindow">
   <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-    <Label
+    <TextBlock
       Foreground="White"
-      FontSize="72" Content="Good job! Now you should take a rest~" />
+      TextWrapping="Wrap"
+      FontSize="72" Text="Good job! Now you should take a rest~" />
   </StackPanel>
 </Window>

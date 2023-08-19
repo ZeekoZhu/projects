@@ -57,13 +57,6 @@ public static class AppExtension
     this AppBuilder builder,
     LogEventLevel level = LogEventLevel.Warning)
   {
-    Log.Logger = new LoggerConfiguration()
-      .MinimumLevel.Is(SerilogSink.TranslateLevel(level))
-      .MinimumLevel.Override("GitRest", Serilog.Events.LogEventLevel.Debug)
-      .WriteTo.Console(
-        outputTemplate:
-        "[{Timestamp:HH:mm:ss} {Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}")
-      .CreateLogger();
     Logger.Sink =
       new SerilogSink();
     Logger.Sink.Log(LogEventLevel.Debug, "App", null, "Log is ready");

@@ -2,6 +2,7 @@
 using System;
 using Avalonia.Controls;
 using GitRest.Logging;
+using Serilog;
 
 namespace GitRest;
 
@@ -13,9 +14,14 @@ class Program
   [STAThread]
   public static void Main(string[] args)
   {
-    Environment.SetEnvironmentVariable(
-      "AVALONIA_SCREEN_SCALE_FACTORS",
-      "HDMI-A-1=2");
+    Log.Logger = new LoggerConfiguration()
+      .MinimumLevel.Warning()
+      .MinimumLevel.Override("GitRest", Serilog.Events.LogEventLevel.Debug)
+      .WriteTo.Console(
+        outputTemplate:
+        "[{Timestamp:HH:mm:ss} {Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}")
+      .CreateLogger();
+    X11Helper.SetGlobalScalingFactor();
     BuildAvaloniaApp()
       .StartWithClassicDesktopLifetime(args, ShutdownMode.OnExplicitShutdown);
   }
