@@ -1,7 +1,10 @@
 using System;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using GitRest.Service;
 using Serilog;
 
@@ -13,6 +16,7 @@ public partial class App : Application
   private readonly LinuxGitCommandMonitor _commandMonitor = new();
 
   public bool IsMonitoringGit { get; set; }
+  private Subject<bool> MonitoringGitSubject { get; } = new();
 
   public void StartMonitoringGit()
   {
@@ -21,8 +25,20 @@ public partial class App : Application
       return;
     }
 
-    _commandMonitor.Start();
+    MonitoringGitSubject.OnNext(true);
+    Observable.FromEventPattern(
+        _commandMonitor,
+        nameof(_commandMonitor.GitCommandStarted))
+      .TakeUntil(MonitoringGitSubject.Where(it => it == false))
+      // side effect
+      .Do(_ => Log.Information("Git command finished"))
+      .Subscribe(
+        _ =>
+        {
+          Dispatcher.UIThread.InvokeAsync(OpenAlert);
+        });
     Log.Information("Started monitoring git commands");
+    _commandMonitor.Start();
     IsMonitoringGit = true;
   }
 
@@ -34,6 +50,7 @@ public partial class App : Application
     }
 
     _commandMonitor.Stop();
+    MonitoringGitSubject.OnNext(false);
     Log.Information("Stopped monitoring git commands");
     IsMonitoringGit = false;
   }
@@ -74,5 +91,31 @@ public partial class App : Application
         MainWindow.Show();
       }
     }
+  }
+
+  private AlertWindow? _alertWindow;
+
+  public void OpenAlert()
+  {
+    _alertWindow ??= new AlertWindow();
+    // create observable from the Opened event
+    var opened = Observable.FromEventPattern(
+      h => _alertWindow!.Opened += h,
+      h => _alertWindow!.Opened -= h);
+    opened.Delay(TimeSpan.FromSeconds(15))
+      .Subscribe(
+        _ =>
+        {
+          // switch to the avalonia thread
+          Dispatcher.UIThread.InvokeAsync(CloseAlert);
+        });
+
+    _alertWindow.Show();
+    _alertWindow.Closed += (o, args) => _alertWindow = null;
+  }
+
+  public void CloseAlert()
+  {
+    _alertWindow?.Close();
   }
 }

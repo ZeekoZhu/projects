@@ -35,4 +35,9 @@ public partial class MainWindow : Window
       btn.Content = "Stop";
     }
   }
+
+  private void AlertButton_OnClick(object? sender, RoutedEventArgs e)
+  {
+    App.OpenAlert();
+  }
 }

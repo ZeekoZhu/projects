@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CliWrap;
 using CliWrap.Buffered;
+using Serilog;
 
 namespace GitRest.Service;
 
@@ -13,15 +14,18 @@ public class LinuxGitCommandMonitor : IDisposable
   private readonly GitCommandParser _parser = new();
 
   private readonly FileSystemWatcher _watcher;
+  private ILogger Log => Serilog.Log.ForContext<LinuxGitCommandMonitor>();
 
   public LinuxGitCommandMonitor()
   {
     var userHome = Environment.GetEnvironmentVariable("HOME");
     Debug.Assert(userHome != null, nameof(userHome) + " != null");
     _watcher = new FileSystemWatcher(userHome);
-    _watcher.Filter = ".gitignore";
+    var gitconfig = ".gitconfig";
+    _watcher.Filter = gitconfig;
     _watcher.NotifyFilter = NotifyFilters.LastAccess;
     _watcher.Changed += OnWatcherOnChanged;
+    Log.Debug("Initialized with {Home} {Filter}", userHome, gitconfig);
   }
 
   public void Dispose()
@@ -51,6 +55,8 @@ public class LinuxGitCommandMonitor : IDisposable
       // the git command has finished, ignore this event
       return;
     }
+
+    Log.Debug("Git command started: {Pid}", gitProc.Id);
 
     var gitCmd = _parser.Parse(await ResolveCommandlineByPid(gitProc.Id));
     var commandEventArgs = new GitCommandEventArgs(
