@@ -40,4 +40,16 @@ public partial class MainWindow : Window
   {
     App.OpenAlert();
   }
+
+  private void MoveToScreen1_OnClick(object? sender, RoutedEventArgs e)
+  {
+    var screen = Screens.All[0];
+    Position = screen.WorkingArea.Center;
+  }
+
+  private void MoveToScreen2_OnClick(object? sender, RoutedEventArgs e)
+  {
+    var screen = Screens.All[1];
+    Position = screen.WorkingArea.Center;
+  }
 }

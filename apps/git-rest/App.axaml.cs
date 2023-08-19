@@ -93,29 +93,24 @@ public partial class App : Application
     }
   }
 
-  private AlertWindow? _alertWindow;
+  private AlertManager _alertManager = new();
 
   public void OpenAlert()
   {
-    _alertWindow ??= new AlertWindow();
-    // create observable from the Opened event
-    var opened = Observable.FromEventPattern(
-      h => _alertWindow!.Opened += h,
-      h => _alertWindow!.Opened -= h);
-    opened.Delay(TimeSpan.FromSeconds(15))
+    // get screen list
+    _alertManager.ShowAlert();
+    Observable.Return(1)
+      .Delay(TimeSpan.FromSeconds(15))
       .Subscribe(
         _ =>
         {
           // switch to the avalonia thread
           Dispatcher.UIThread.InvokeAsync(CloseAlert);
         });
-
-    _alertWindow.Show();
-    _alertWindow.Closed += (o, args) => _alertWindow = null;
   }
 
   public void CloseAlert()
   {
-    _alertWindow?.Close();
+    _alertManager.CloseAlert();
   }
 }

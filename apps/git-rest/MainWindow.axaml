@@ -8,5 +8,7 @@
   <StackPanel Spacing="16">
     <Button Click="ToggleBtn_OnClick" Content="Start" />
     <Button Content="Alert" Click="AlertButton_OnClick"/>
+    <Button Content="Move To Screen 1" Click="MoveToScreen1_OnClick" />
+    <Button Content="Move To Screen 2" Click="MoveToScreen2_OnClick" />
   </StackPanel>
 </Window>

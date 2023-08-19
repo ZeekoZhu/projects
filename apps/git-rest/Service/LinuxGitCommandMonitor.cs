@@ -85,6 +85,7 @@ public class LinuxGitCommandMonitor : IDisposable
       .WithArguments(new[] { "-p", pid.ToString(), "-o", "cmd=" });
     var psInfo = await psCmd.ExecuteBufferedAsync();
     var commandline = psInfo.StandardOutput;
+    Serilog.Log.ForContext<LinuxGitCommandMonitor>().Debug("ps output: {Output}", commandline);
     return commandline;
   }
 
