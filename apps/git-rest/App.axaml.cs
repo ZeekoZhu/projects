@@ -2,11 +2,42 @@ using System;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using GitRest.Service;
+using Serilog;
 
 namespace GitRest;
 
 public partial class App : Application
 {
+  private ILogger Log => Serilog.Log.ForContext<App>();
+  private readonly LinuxGitCommandMonitor _commandMonitor = new();
+
+  public bool IsMonitoringGit { get; set; }
+
+  public void StartMonitoringGit()
+  {
+    if (IsMonitoringGit)
+    {
+      return;
+    }
+
+    _commandMonitor.Start();
+    Log.Information("Started monitoring git commands");
+    IsMonitoringGit = true;
+  }
+
+  public void StopMonitoringGit()
+  {
+    if (!IsMonitoringGit)
+    {
+      return;
+    }
+
+    _commandMonitor.Stop();
+    Log.Information("Stopped monitoring git commands");
+    IsMonitoringGit = false;
+  }
+
   public override void Initialize()
   {
     AvaloniaXamlLoader.Load(this);

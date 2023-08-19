@@ -5,5 +5,5 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="GitRest.MainWindow"
         Title="GitRest">
-    Welcome to Avalonia!
+  <Button Click="ToggleBtn_OnClick" Content="Start" />
 </Window>
