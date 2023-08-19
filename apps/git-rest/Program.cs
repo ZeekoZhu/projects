@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using System;
 using Avalonia.Controls;
+using GitRest.Logging;
 
 namespace GitRest;
 
@@ -25,5 +26,5 @@ class Program
       .UsePlatformDetect()
       .With(new X11PlatformOptions { EnableIme = true })
       .WithInterFont()
-      .LogToTrace();
+      .AddLog();
 }
