@@ -28,10 +28,11 @@ public partial class App : Application
     MonitoringGitSubject.OnNext(true);
     Observable.FromEventPattern(
         _commandMonitor,
-        nameof(_commandMonitor.GitCommandStarted))
+        nameof(_commandMonitor.GitCommandFinished))
       .TakeUntil(MonitoringGitSubject.Where(it => it == false))
       // side effect
       .Do(_ => Log.Information("Git command finished"))
+      .Throttle(TimeSpan.FromSeconds(1))
       .Subscribe(
         _ =>
         {
