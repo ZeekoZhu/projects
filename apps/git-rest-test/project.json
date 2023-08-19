@@ -1,14 +1,14 @@
 {
-  "name": "process-mon",
+  "name": "git-rest-test",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "projectType": "library",
-  "sourceRoot": "libs/process-mon",
+  "projectType": "application",
+  "sourceRoot": "apps/git-rest-test",
   "targets": {
     "build": {
       "executor": "@nx-dotnet/core:build",
       "outputs": [
-        "{workspaceRoot}/dist/libs/process-mon",
-        "{workspaceRoot}/dist/intermediates/libs/process-mon"
+        "{workspaceRoot}/dist/apps/git-rest-test",
+        "{workspaceRoot}/dist/intermediates/apps/git-rest-test"
       ],
       "options": {
         "configuration": "Debug",
@@ -19,6 +19,10 @@
           "configuration": "Release"
         }
       }
+    },
+    "test": {
+      "executor": "@nx-dotnet/core:test",
+      "options": {}
     },
     "lint": {
       "executor": "@nx-dotnet/core:format"

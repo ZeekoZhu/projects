@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\process-mon\ProcessMon.csproj" />
+    <ProjectReference Include="..\git-rest\GitRest.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,14 +1,14 @@
 {
-  "name": "process-mon-test",
+  "name": "git-mon",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "projectType": "library",
-  "sourceRoot": "libs/process-mon-test",
+  "projectType": "application",
+  "sourceRoot": "apps/git-mon",
   "targets": {
     "build": {
       "executor": "@nx-dotnet/core:build",
       "outputs": [
-        "{workspaceRoot}/dist/libs/process-mon-test",
-        "{workspaceRoot}/dist/intermediates/libs/process-mon-test"
+        "{workspaceRoot}/dist/apps/git-mon",
+        "{workspaceRoot}/dist/intermediates/apps/git-mon"
       ],
       "options": {
         "configuration": "Debug",
@@ -20,9 +20,16 @@
         }
       }
     },
-    "test": {
-      "executor": "@nx-dotnet/core:test",
-      "options": {}
+    "serve": {
+      "executor": "@nx-dotnet/core:serve",
+      "options": {
+        "configuration": "Debug"
+      },
+      "configurations": {
+        "production": {
+          "configuration": "Release"
+        }
+      }
     },
     "lint": {
       "executor": "@nx-dotnet/core:format"
