@@ -1,12 +1,15 @@
+using System;
 using System.Collections.Generic;
+using System.Reactive.Linq;
 using Avalonia.Controls;
+using Avalonia.Threading;
 using Serilog;
 
 namespace GitRest.Service;
 
-public class AlertManager
+public class AlertWindowManager
 {
-  private ILogger Log => Serilog.Log.ForContext<AlertManager>();
+  private ILogger Log => Serilog.Log.ForContext<AlertWindowManager>();
   private readonly List<AlertWindow> _alerts = new();
 
   /// <summary>
@@ -25,6 +28,15 @@ public class AlertManager
       alert.OpenDestination = screen.WorkingArea.Center;
       alert.Show();
     }
+
+    Observable.Return(1)
+      .Delay(TimeSpan.FromSeconds(15))
+      .Subscribe(
+        _ =>
+        {
+          // switch to the avalonia thread
+          Dispatcher.UIThread.InvokeAsync(CloseAlert);
+        });
   }
 
   public void CloseAlert()

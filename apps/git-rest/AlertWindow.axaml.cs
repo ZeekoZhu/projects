@@ -36,6 +36,7 @@ public partial class AlertWindow : Window
                 Position = OpenDestination.Value;
                 // remove the title bar
                 ExtendClientAreaToDecorationsHint = true;
+                SystemDecorations = SystemDecorations.BorderOnly;
                 // maximize the window
                 WindowState = WindowState.Maximized;
               }

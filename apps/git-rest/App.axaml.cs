@@ -12,11 +12,39 @@ namespace GitRest;
 
 public partial class App : Application
 {
-  private ILogger Log => Serilog.Log.ForContext<App>();
   private readonly LinuxGitCommandMonitor _commandMonitor = new();
+  private readonly TakeARestManager _takeARestManager = new();
+  private readonly AlertWindowManager _alertWindowManager = new();
+  private ILogger Log => Serilog.Log.ForContext<App>();
 
   public bool IsMonitoringGit { get; set; }
-  private Subject<bool> MonitoringGitSubject { get; } = new();
+
+  public IClassicDesktopStyleApplicationLifetime Desktop =>
+    (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)!;
+
+  public MainWindow? MainWindow { get; set; }
+
+  private void SetupMonitor()
+  {
+    _takeARestManager.ShouldRest += (sender, args) =>
+    {
+      Log.Information(
+        "Should rest, you have been working {Duration}",
+        args.Duration);
+      OpenAlert();
+    };
+    Observable.FromEventPattern(
+        _commandMonitor,
+        nameof(_commandMonitor.GitCommandFinished))
+      .Where(_ => IsMonitoringGit)
+      .Do(_ => Log.Information("Git command finished"))
+      .Throttle(TimeSpan.FromSeconds(15))
+      .Subscribe(
+        _ =>
+        {
+          _takeARestManager.SuggestARest();
+        });
+  }
 
   public void StartMonitoringGit()
   {
@@ -25,19 +53,6 @@ public partial class App : Application
       return;
     }
 
-    MonitoringGitSubject.OnNext(true);
-    Observable.FromEventPattern(
-        _commandMonitor,
-        nameof(_commandMonitor.GitCommandFinished))
-      .TakeUntil(MonitoringGitSubject.Where(it => it == false))
-      // side effect
-      .Do(_ => Log.Information("Git command finished"))
-      .Throttle(TimeSpan.FromSeconds(1))
-      .Subscribe(
-        _ =>
-        {
-          Dispatcher.UIThread.InvokeAsync(OpenAlert);
-        });
     Log.Information("Started monitoring git commands");
     _commandMonitor.Start();
     IsMonitoringGit = true;
@@ -51,7 +66,6 @@ public partial class App : Application
     }
 
     _commandMonitor.Stop();
-    MonitoringGitSubject.OnNext(false);
     Log.Information("Stopped monitoring git commands");
     IsMonitoringGit = false;
   }
@@ -59,12 +73,8 @@ public partial class App : Application
   public override void Initialize()
   {
     AvaloniaXamlLoader.Load(this);
+    SetupMonitor();
   }
-
-  public IClassicDesktopStyleApplicationLifetime Desktop =>
-    (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)!;
-
-  public MainWindow? MainWindow { get; set; }
 
   private void QuitMenuItem_OnClick(object? sender, EventArgs e)
   {
@@ -94,24 +104,14 @@ public partial class App : Application
     }
   }
 
-  private AlertManager _alertManager = new();
-
   public void OpenAlert()
   {
     // get screen list
-    _alertManager.ShowAlert();
-    Observable.Return(1)
-      .Delay(TimeSpan.FromSeconds(15))
-      .Subscribe(
-        _ =>
-        {
-          // switch to the avalonia thread
-          Dispatcher.UIThread.InvokeAsync(CloseAlert);
-        });
+    _alertWindowManager.ShowAlert();
   }
 
   public void CloseAlert()
   {
-    _alertManager.CloseAlert();
+    _alertWindowManager.CloseAlert();
   }
 }
