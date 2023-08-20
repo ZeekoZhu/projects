@@ -1,12 +1,11 @@
 using System;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.Threading;
 using GitRest.Service;
-using Serilog;
+using Splat;
+using ILogger = Serilog.ILogger;
 
 namespace GitRest;
 
@@ -86,7 +85,7 @@ public partial class App : Application
   {
     if (MainWindow is null)
     {
-      MainWindow = new MainWindow();
+      MainWindow = Locator.Current.GetService<MainWindow>()!;
       Desktop.MainWindow = MainWindow;
       MainWindow.Show();
     }

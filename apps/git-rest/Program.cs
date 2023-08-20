@@ -1,7 +1,9 @@
 ﻿using Avalonia;
 using System;
 using Avalonia.Controls;
+using Avalonia.ReactiveUI;
 using GitRest.Logging;
+using GitRest.Service;
 using Serilog;
 
 namespace GitRest;
@@ -22,6 +24,7 @@ class Program
         "[{Timestamp:HH:mm:ss} {Level:u3} {SourceContext}] {Message:lj}{NewLine}{Exception}")
       .CreateLogger();
     X11Helper.SetGlobalScalingFactor();
+    _ = new Bootstrap();
     BuildAvaloniaApp()
       .StartWithClassicDesktopLifetime(args, ShutdownMode.OnExplicitShutdown);
   }
@@ -32,5 +35,6 @@ class Program
       .UsePlatformDetect()
       .With(new X11PlatformOptions { EnableIme = true })
       .WithInterFont()
-      .AddLog();
+      .AddLog()
+      .UseReactiveUI();
 }
