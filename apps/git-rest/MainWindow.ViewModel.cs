@@ -21,4 +21,7 @@ public class MainWindowViewModel : ReactiveObject
     TimeSpan.FromMinutes(55),
     TimeSpan.FromMinutes(60),
   };
+
+  [Reactive]
+  public bool IsMonitoringGit { get; set; }
 }

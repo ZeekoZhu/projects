@@ -14,9 +14,11 @@ namespace GitRest;
 public partial class MainWindow : ReactiveWindow<MainWindowViewModel>,
   IEnableLogger, IEnableLocator
 {
+  private readonly TakeARestManager _takeARest;
+
   public MainWindow()
   {
-    var takeARest = this.GetService<TakeARestManager>();
+    _takeARest = this.GetService<TakeARestManager>();
     InitializeComponent(attachDevTools: true);
     ViewModel = this.GetService<MainWindowViewModel>();
     this.WhenActivated(
@@ -33,9 +35,40 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>,
             view => view.WorkingDurationSelect.SelectedIndex)
           .DisposeWith(disposable);
 
+        // monitor git commands
+        ViewModel.WhenAnyValue(vm => vm.IsMonitoringGit)
+          .Select(isMonitoring => isMonitoring ? "Stop" : "Start")
+          .BindTo(ToggleMonitoringBtn, view => view.Content)
+          .DisposeWith(disposable);
+
+        // save changes to settings
         ViewModel.WhenAnyValue(vm => vm.WorkingTimeSpanIndex)
           .Select(index => ViewModel.WorkingTimeSpans[index])
-          .Subscribe(ts => takeARest.Duration = ts)
+          .Subscribe(ts => _takeARest.Duration = ts)
+          .DisposeWith(disposable);
+
+        // timer label
+        ViewModel.WhenAnyValue(vm => vm.IsMonitoringGit)
+          .Select(
+            it =>
+            {
+              switch (it)
+              {
+                case false:
+                  return Observable.Return(TimeSpan.Zero);
+                default:
+                {
+                  var elapsedSeconds = (DateTime.Now - _takeARest.LastRestTime)
+                    .TotalSeconds;
+                  return Observable.Interval(TimeSpan.FromSeconds(1))
+                    .Select(n => TimeSpan.FromSeconds(elapsedSeconds + n + 1));
+                }
+              }
+            })
+          .Switch()
+          .Select(it => it.ToString(@"hh\:mm\:ss"))
+          .ObserveOn(RxApp.MainThreadScheduler)
+          .BindTo(TimerTxt, view => view.Text)
           .DisposeWith(disposable);
       });
   }
@@ -51,16 +84,16 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>,
 
   private void ToggleBtn_OnClick(object? sender, RoutedEventArgs e)
   {
-    var btn = (Button)sender!;
     if (App.IsMonitoringGit)
     {
       App.StopMonitoringGit();
-      btn.Content = "Start";
+      ViewModel!.IsMonitoringGit = false;
     }
     else
     {
+      _takeARest.Start();
       App.StartMonitoringGit();
-      btn.Content = "Stop";
+      ViewModel!.IsMonitoringGit = true;
     }
   }
 

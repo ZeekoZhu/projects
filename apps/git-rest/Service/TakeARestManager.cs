@@ -12,33 +12,31 @@ public class TakeARestManager
     set
     {
       _duration = value;
-      _lastRestTime = null;
+      LastRestTime = DateTime.Now;
     }
   }
 
-  private DateTime? _lastRestTime;
+  public DateTime LastRestTime { get; private set; } = DateTime.Now;
+
   private TimeSpan _duration = TimeSpan.FromMinutes(45);
 
   public event EventHandler<TakeARestEventArgs>? ShouldRest;
 
   public void SuggestARest()
   {
-    if (_lastRestTime is not null &&
-        DateTime.Now - _lastRestTime < Duration)
+    // ignore if last rest time is too close
+    if (DateTime.Now - LastRestTime < Duration)
     {
       return;
     }
 
-    if (_lastRestTime is not null)
-    {
-      var duration = DateTime.Now - _lastRestTime.Value;
-      ShouldRest?.Invoke(this, new TakeARestEventArgs(duration));
-    }
-    else
-    {
-      ShouldRest?.Invoke(this, new TakeARestEventArgs(Duration));
-    }
+    var duration = DateTime.Now - LastRestTime;
+    LastRestTime = DateTime.Now;
+    ShouldRest?.Invoke(this, new TakeARestEventArgs(duration));
+  }
 
-    _lastRestTime = DateTime.Now;
+  public void Start()
+  {
+    LastRestTime = DateTime.Now;
   }
 }

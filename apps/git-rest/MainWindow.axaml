@@ -11,7 +11,10 @@
   <TabControl Margin="4">
     <TabItem Header="General">
       <StackPanel Spacing="8" Margin="0 8 0 8">
-        <Button Click="ToggleBtn_OnClick" Content="Start" />
+        <StackPanel Orientation="Horizontal">
+          <TextBlock x:Name="TimerTxt" VerticalAlignment="Center" Width="120" />
+        <Button x:Name="ToggleMonitoringBtn" Click="ToggleBtn_OnClick" />
+        </StackPanel>
         <Border BorderThickness="0.5" BorderBrush="Silver" />
         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
           <Label VerticalAlignment="Center">Working Duration</Label>
