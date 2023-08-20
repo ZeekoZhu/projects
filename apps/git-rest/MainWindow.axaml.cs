@@ -19,7 +19,12 @@ public partial class MainWindow : ReactiveWindow<MainWindowViewModel>,
   public MainWindow()
   {
     _takeARest = this.GetService<TakeARestManager>();
+#if DEBUG
     InitializeComponent(attachDevTools: true);
+#else
+    InitializeComponent();
+#endif
+
     ViewModel = this.GetService<MainWindowViewModel>();
     this.WhenActivated(
       disposable =>
