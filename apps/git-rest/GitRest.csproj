@@ -40,4 +40,8 @@
   <ItemGroup>
     <Reference Include="System.Runtime" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Component\" />
+  </ItemGroup>
 </Project>

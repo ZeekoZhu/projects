@@ -1,15 +1,43 @@
 using System;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.ReactiveUI;
+using GitRest.Service;
+using ReactiveUI;
+using Splat;
 
 namespace GitRest;
 
-public partial class MainWindow : Window
+public partial class MainWindow : ReactiveWindow<MainWindowViewModel>,
+  IEnableLogger, IEnableLocator
 {
   public MainWindow()
   {
-    InitializeComponent();
+    var takeARest = this.GetService<TakeARestManager>();
+    InitializeComponent(attachDevTools: true);
+    ViewModel = this.GetService<MainWindowViewModel>();
+    this.WhenActivated(
+      disposable =>
+      {
+        this.OneWayBind(
+            ViewModel,
+            viewModel => viewModel.WorkingTimeSpans,
+            view => view.WorkingDurationSelect.ItemsSource)
+          .DisposeWith(disposable);
+        this.Bind(
+            ViewModel,
+            viewModel => viewModel.WorkingTimeSpanIndex,
+            view => view.WorkingDurationSelect.SelectedIndex)
+          .DisposeWith(disposable);
+
+        ViewModel.WhenAnyValue(vm => vm.WorkingTimeSpanIndex)
+          .Select(index => ViewModel.WorkingTimeSpans[index])
+          .Subscribe(ts => takeARest.Duration = ts)
+          .DisposeWith(disposable);
+      });
   }
 
   protected override void OnClosing(WindowClosingEventArgs e)

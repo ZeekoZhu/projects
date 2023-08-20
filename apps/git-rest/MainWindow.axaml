@@ -2,13 +2,27 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:app="clr-namespace:GitRest"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="GitRest.MainWindow"
-        Title="GitRest">
-  <TabControl Margin="5">
+        Title="GitRest"
+        x:DataType="app:MainWindowViewModel">
+  <TabControl Margin="4">
     <TabItem Header="General">
-      <StackPanel>
+      <StackPanel Spacing="8" Margin="0 8 0 8">
         <Button Click="ToggleBtn_OnClick" Content="Start" />
+        <Border BorderThickness="0.5" BorderBrush="Silver" />
+        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+          <Label VerticalAlignment="Center">Working Duration</Label>
+          <ComboBox x:Name="WorkingDurationSelect">
+            <ComboBox.ItemTemplate>
+              <DataTemplate x:DataType="system:TimeSpan">
+                <TextBlock Text="{Binding Converter={StaticResource TimeSpanToMinutes}}" />
+              </DataTemplate>
+            </ComboBox.ItemTemplate>
+          </ComboBox>
+        </StackPanel>
       </StackPanel>
     </TabItem>
     <TabItem Header="DEBUG">

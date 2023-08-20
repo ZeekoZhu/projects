@@ -6,15 +6,25 @@ public class TakeARestManager
 {
   public record TakeARestEventArgs(TimeSpan Duration);
 
-  private readonly TimeSpan _duration = TimeSpan.FromMinutes(45);
+  public TimeSpan Duration
+  {
+    get => _duration;
+    set
+    {
+      _duration = value;
+      _lastRestTime = null;
+    }
+  }
+
   private DateTime? _lastRestTime;
+  private TimeSpan _duration = TimeSpan.FromMinutes(45);
 
   public event EventHandler<TakeARestEventArgs>? ShouldRest;
 
   public void SuggestARest()
   {
     if (_lastRestTime is not null &&
-        DateTime.Now - _lastRestTime < _duration)
+        DateTime.Now - _lastRestTime < Duration)
     {
       return;
     }
@@ -26,7 +36,7 @@ public class TakeARestManager
     }
     else
     {
-      ShouldRest?.Invoke(this, new TakeARestEventArgs(_duration));
+      ShouldRest?.Invoke(this, new TakeARestEventArgs(Duration));
     }
 
     _lastRestTime = DateTime.Now;
