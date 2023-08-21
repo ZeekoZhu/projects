@@ -17,26 +17,30 @@ public class AlertWindowManager
   /// </summary>
   public void ShowAlert()
   {
-    var stub = new Window();
-    var screens = stub.Screens.All;
-    Log.Debug("Found {Count} screens", screens.Count);
-    foreach (var screen in screens)
-    {
-      var alert = new AlertWindow();
-      _alerts.Add(alert);
-      Log.Debug("Open alert on {Position}", screen.WorkingArea.Center);
-      alert.OpenDestination = screen.WorkingArea.Center;
-      alert.Show();
-    }
-
-    Observable.Return(1)
-      .Delay(TimeSpan.FromSeconds(15))
-      .Subscribe(
-        _ =>
+    Dispatcher.UIThread.Invoke(
+      () =>
+      {
+        var stub = new Window();
+        var screens = stub.Screens.All;
+        Log.Debug("Found {Count} screens", screens.Count);
+        foreach (var screen in screens)
         {
-          // switch to the avalonia thread
-          Dispatcher.UIThread.InvokeAsync(CloseAlert);
-        });
+          var alert = new AlertWindow();
+          _alerts.Add(alert);
+          Log.Debug("Open alert on {Position}", screen.WorkingArea.Center);
+          alert.OpenDestination = screen.WorkingArea.Center;
+          alert.Show();
+        }
+
+        Observable.Return(1)
+          .Delay(TimeSpan.FromSeconds(15))
+          .Subscribe(
+            _ =>
+            {
+              // switch to the avalonia thread
+              Dispatcher.UIThread.InvokeAsync(CloseAlert);
+            });
+      });
   }
 
   public void CloseAlert()

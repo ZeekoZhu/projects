@@ -5,16 +5,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using CliWrap;
 using CliWrap.Buffered;
-using Serilog;
+using Splat;
 
 namespace GitRest.Service;
 
-public class LinuxGitCommandMonitor : IDisposable
+public class LinuxGitCommandMonitor : IDisposable, IEnableLogger
 {
   private readonly GitCommandParser _parser = new();
 
   private readonly FileSystemWatcher _watcher;
-  private ILogger Log => Serilog.Log.ForContext<LinuxGitCommandMonitor>();
 
   public LinuxGitCommandMonitor()
   {
@@ -25,7 +24,7 @@ public class LinuxGitCommandMonitor : IDisposable
     _watcher.Filter = gitconfig;
     _watcher.NotifyFilter = NotifyFilters.LastAccess;
     _watcher.Changed += OnWatcherOnChanged;
-    Log.Debug("Initialized with {Home} {Filter}", userHome, gitconfig);
+    this.Log().Debug("Initialized with {Home} {Filter}", userHome, gitconfig);
   }
 
   public void Dispose()
@@ -56,25 +55,37 @@ public class LinuxGitCommandMonitor : IDisposable
       return;
     }
 
-    Log.Debug("Git command started: {Pid}", gitProc.Id);
+    this.Log().Debug("Git command started: {Pid}", gitProc.Id);
 
-    var gitCmd = _parser.Parse(await ResolveCommandlineByPid(gitProc.Id));
-    var commandEventArgs = new GitCommandEventArgs(
-      gitCmd.IsGitCommit,
-      gitCmd.IsGitPush);
-    GitCommandStarted?.Invoke(this, commandEventArgs);
+    try
+    {
+      var gitCmd = _parser.Parse(await ResolveCommandlineByPid(gitProc.Id));
+      var commandEventArgs = new GitCommandEventArgs(
+        gitCmd.IsGitCommit,
+        gitCmd.IsGitPush);
+      GitCommandStarted?.Invoke(this, commandEventArgs);
 
-    if (gitProc.HasExited)
-    {
-      GitCommandFinished?.Invoke(this, commandEventArgs);
-    }
-    else
-    {
-      gitProc.Exited += (o, eventArgs) =>
+      if (gitProc.HasExited)
       {
         GitCommandFinished?.Invoke(this, commandEventArgs);
-      };
-      gitProc.EnableRaisingEvents = true;
+      }
+      else
+      {
+        gitProc.Exited += (o, eventArgs) =>
+        {
+          GitCommandFinished?.Invoke(this, commandEventArgs);
+        };
+        gitProc.EnableRaisingEvents = true;
+      }
+    }
+    catch (Exception e)
+    {
+      this.Log()
+        .Error(
+          e,
+          "Failed to retreive command info of {ProcessId}",
+          gitProc.Id);
+      throw;
     }
   }
 
@@ -85,7 +96,8 @@ public class LinuxGitCommandMonitor : IDisposable
       .WithArguments(new[] { "-p", pid.ToString(), "-o", "cmd=" });
     var psInfo = await psCmd.ExecuteBufferedAsync();
     var commandline = psInfo.StandardOutput;
-    Serilog.Log.ForContext<LinuxGitCommandMonitor>().Debug("ps output: {Output}", commandline);
+    Serilog.Log.ForContext<LinuxGitCommandMonitor>()
+      .Debug("ps output: {Output}", commandline);
     return commandline;
   }
 
