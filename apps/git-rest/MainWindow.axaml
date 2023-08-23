@@ -3,30 +3,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:app="clr-namespace:GitRest"
-        xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:component="clr-namespace:GitRest.Component"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="GitRest.MainWindow"
         Title="GitRest"
         x:DataType="app:MainWindowViewModel">
   <TabControl Margin="4">
     <TabItem Header="General">
-      <StackPanel Spacing="8" Margin="0 8 0 8">
-        <StackPanel Orientation="Horizontal">
-          <TextBlock x:Name="TimerTxt" VerticalAlignment="Center" Width="120" />
-        <Button x:Name="ToggleMonitoringBtn" Click="ToggleBtn_OnClick" />
-        </StackPanel>
-        <Border BorderThickness="0.5" BorderBrush="Silver" />
-        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
-          <Label VerticalAlignment="Center">Working Duration</Label>
-          <ComboBox x:Name="WorkingDurationSelect">
-            <ComboBox.ItemTemplate>
-              <DataTemplate x:DataType="system:TimeSpan">
-                <TextBlock Text="{Binding Converter={StaticResource TimeSpanToMinutes}}" />
-              </DataTemplate>
-            </ComboBox.ItemTemplate>
-          </ComboBox>
-        </StackPanel>
-      </StackPanel>
+      <component:TimerView />
     </TabItem>
     <TabItem Header="DEBUG">
       <StackPanel Spacing="16">

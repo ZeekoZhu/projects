@@ -1,91 +1,36 @@
 using System;
 using System.IO;
-using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using Avalonia.ReactiveUI;
 using GitRest.Infrastructure;
 using GitRest.Service;
 using ReactiveUI;
 using Splat;
-using ILogger = Serilog.ILogger;
 
 namespace GitRest;
 
 public partial class App : Application, IEnableLocator
 {
-  private readonly LinuxGitCommandMonitor _commandMonitor = new();
-  private readonly TakeARestManager _takeARestManager = new();
-  private readonly AlertWindowManager _alertWindowManager = new();
-  private ILogger Log => Serilog.Log.ForContext<App>();
+  private readonly TakeARestManager _takeARestManager;
+  private readonly AlertWindowManager _alertWindowManager;
 
-  public bool IsMonitoringGit { get; set; }
+  public App()
+  {
+    _alertWindowManager = this.GetService<AlertWindowManager>();
+    _takeARestManager = this.GetService<TakeARestManager>();
+  }
 
   public IClassicDesktopStyleApplicationLifetime Desktop =>
     (ApplicationLifetime as IClassicDesktopStyleApplicationLifetime)!;
 
   public MainWindow? MainWindow { get; set; }
 
-  private void SetupMonitor()
-  {
-    _takeARestManager.ShouldRest += (sender, args) =>
-    {
-      Log.Information(
-        "Should rest, you have been working {Duration}",
-        args.Duration);
-      OpenAlert();
-    };
-    Observable.FromEventPattern(
-        _commandMonitor,
-        nameof(_commandMonitor.GitCommandFinished))
-      .Where(
-        it => it.EventArgs is GitCommandEventArgs)
-      .Select(it => (GitCommandEventArgs)it.EventArgs)
-      .Where(_ => IsMonitoringGit)
-      .Where(
-        // todo: add ignore list
-        it => it.ProcessInfo.WorkingDirectory?.Contains(
-          "project",
-          StringComparison.OrdinalIgnoreCase) ?? true)
-      .Where(it => it.IsGitCommit || it.IsGitPush)
-      .Do(_ => Log.Information("Git commit/push finished"))
-      .Throttle(TimeSpan.FromSeconds(15))
-      .Subscribe(
-        _ =>
-        {
-          _takeARestManager.SuggestARest();
-        });
-  }
-
-  public void StartMonitoringGit()
-  {
-    if (IsMonitoringGit)
-    {
-      return;
-    }
-
-    Log.Information("Started monitoring git commands");
-    _commandMonitor.Start();
-    IsMonitoringGit = true;
-  }
-
-  public void StopMonitoringGit()
-  {
-    if (!IsMonitoringGit)
-    {
-      return;
-    }
-
-    _commandMonitor.Stop();
-    Log.Information("Stopped monitoring git commands");
-    IsMonitoringGit = false;
-  }
 
   public override void Initialize()
   {
     AvaloniaXamlLoader.Load(this);
-    SetupMonitor();
+    _takeARestManager.SetupMonitor();
   }
 
   public override void OnFrameworkInitializationCompleted()

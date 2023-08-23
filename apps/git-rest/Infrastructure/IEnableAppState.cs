@@ -20,12 +20,12 @@ public static class EnableAppStateExtensions
     it.GetService<SuspendHelper>().ManualSaveState();
   }
 
-  public static void EnableAutoPersist<T>(
+  public static IDisposable EnableAutoPersist<T>(
     this T it,
     Action<T, AppState> updateState) where T : IReactiveObject, IEnableAppState
   {
     var state = it.GetAppState();
-    it.AutoPersist(
+    return it.AutoPersist(
       x =>
       {
         updateState(x, state);

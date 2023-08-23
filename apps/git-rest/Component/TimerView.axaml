@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:system="clr-namespace:System;assembly=System.Runtime"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="GitRest.Component.TimerView">
+  <StackPanel Spacing="8" Margin="0 8 0 8">
+    <StackPanel Orientation="Horizontal">
+      <TextBlock x:Name="TimerTxt" VerticalAlignment="Center" Width="120" />
+      <Button x:Name="ToggleTimerBtn" />
+    </StackPanel>
+    <Border BorderThickness="0.5" BorderBrush="Silver" />
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+      <Label VerticalAlignment="Center">Working Duration</Label>
+      <ComboBox x:Name="WorkingDurationSelect">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="system:TimeSpan">
+            <TextBlock Text="{Binding Converter={StaticResource TimeSpanToMinutes}}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+    </StackPanel>
+  </StackPanel>
+</UserControl>

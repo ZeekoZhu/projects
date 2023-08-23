@@ -14,22 +14,22 @@ public class Bootstrap : IEnableLogger
     // platform specific
     if (PlatformHelper.IsLinux())
     {
-      Locator.CurrentMutable.Register(
+      Locator.CurrentMutable.RegisterLazySingleton(
         () => new LinuxGitCommandMonitor());
     }
 
     // service
-    Locator.CurrentMutable.Register(
+    Locator.CurrentMutable.RegisterLazySingleton(
       () => new GitCommandParser());
-    Locator.CurrentMutable.Register(
+    Locator.CurrentMutable.RegisterLazySingleton(
       () => new AlertWindowManager());
-    Locator.CurrentMutable.Register(
+    Locator.CurrentMutable.RegisterLazySingleton(
       () => new TakeARestManager());
 
     // window
-    Locator.CurrentMutable.Register(
+    Locator.CurrentMutable.RegisterLazySingleton(
       () => new MainWindow());
-    Locator.CurrentMutable.Register(
+    Locator.CurrentMutable.RegisterLazySingleton(
       () => new MainWindowViewModel());
   }
 }
