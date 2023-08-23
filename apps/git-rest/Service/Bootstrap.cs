@@ -11,6 +11,10 @@ public class Bootstrap : IEnableLogger
     // infrastructure
     Locator.CurrentMutable.UseSerilogFullLogger();
 
+    // config object
+    Locator.CurrentMutable.RegisterLazySingleton(
+      GitMonitorOptions.Load);
+
     // platform specific
     if (PlatformHelper.IsLinux())
     {

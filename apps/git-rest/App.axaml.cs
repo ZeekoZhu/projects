@@ -3,7 +3,6 @@ using System.IO;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
-using GitRest.Infrastructure;
 using GitRest.Service;
 using ReactiveUI;
 using Splat;

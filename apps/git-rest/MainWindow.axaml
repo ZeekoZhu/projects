@@ -7,10 +7,15 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="GitRest.MainWindow"
         Title="GitRest"
+        MinWidth="800"
+        MinHeight="450"
         x:DataType="app:MainWindowViewModel">
   <TabControl Margin="4">
     <TabItem Header="General">
       <component:TimerView />
+    </TabItem>
+    <TabItem Header="Config">
+      <component:ConfigView />
     </TabItem>
     <TabItem Header="DEBUG">
       <StackPanel Spacing="16">

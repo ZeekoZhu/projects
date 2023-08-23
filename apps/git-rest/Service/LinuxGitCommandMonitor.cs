@@ -74,7 +74,7 @@ public class LinuxGitCommandMonitor : IDisposable, IEnableLogger
       }
       else
       {
-        gitProc.Exited += (o, eventArgs) =>
+        gitProc.Exited += (_, _) =>
         {
           GitCommandFinished?.Invoke(this, commandEventArgs);
         };

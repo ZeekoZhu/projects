@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Reactive.Linq;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -9,6 +10,7 @@ namespace GitRest.Service;
 
 public class TakeARestManager : ReactiveObject, IEnableLocator
 {
+  private readonly GitMonitorOptions _gitMonitorOptions;
   private TimeSpan _duration = TimeSpan.FromMinutes(45);
 
   public TimeSpan Duration
@@ -34,6 +36,7 @@ public class TakeARestManager : ReactiveObject, IEnableLocator
 
   public TakeARestManager()
   {
+    _gitMonitorOptions = this.GetService<GitMonitorOptions>();
     // elapsed time
     this.WhenAnyValue(vm => vm.IsRunning)
       .Select(
@@ -56,6 +59,31 @@ public class TakeARestManager : ReactiveObject, IEnableLocator
       .ToPropertyEx(this, x => x.Elapsed);
   }
 
+  private bool ShouldIgnoreGitActivity(SimpleProcessInfo proc)
+  {
+    if (proc.WorkingDirectory is null)
+    {
+      this.Log()
+        .Warn(
+          "Unable to determine working directory of {Cmd}",
+          proc.CommandLine);
+      return true;
+    }
+
+    StringComparison comparison = PlatformHelper.IsWindows()
+      ? StringComparison.CurrentCultureIgnoreCase
+      : StringComparison.Ordinal;
+
+    var shouldIgnoreGitActivity = _gitMonitorOptions.IgnoreDirectory.Any(
+      path => proc.WorkingDirectory.StartsWith(path, comparison));
+    if (shouldIgnoreGitActivity)
+    {
+      this.Log().Debug("Ignore git activity in {Path}", proc.WorkingDirectory);
+    }
+
+    return shouldIgnoreGitActivity;
+  }
+
   public void SetupMonitor()
   {
     var commandMonitor = this.GetService<LinuxGitCommandMonitor>();
@@ -75,11 +103,7 @@ public class TakeARestManager : ReactiveObject, IEnableLocator
         it => it.EventArgs is GitCommandEventArgs)
       .Select(it => (GitCommandEventArgs)it.EventArgs)
       .Where(_ => IsRunning)
-      .Where(
-        // todo: add ignore list
-        it => it.ProcessInfo.WorkingDirectory?.Contains(
-          "project",
-          StringComparison.OrdinalIgnoreCase) ?? true)
+      .Where(it => !ShouldIgnoreGitActivity(it.ProcessInfo))
       .Where(it => it.IsGitCommit || it.IsGitPush)
       .Do(_ => Log.Information("Git commit/push finished"))
       .Throttle(TimeSpan.FromSeconds(15))

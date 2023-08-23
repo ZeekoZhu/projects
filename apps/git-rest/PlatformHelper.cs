@@ -8,4 +8,9 @@ public class PlatformHelper
   {
     return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
   }
+
+  public static bool IsWindows()
+  {
+    return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+  }
 }
