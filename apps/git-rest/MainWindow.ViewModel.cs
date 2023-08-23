@@ -1,12 +1,39 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
+using GitRest.Infrastructure;
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
+using Splat;
 
 namespace GitRest;
 
-public class MainWindowViewModel : ReactiveObject
+[DataContract]
+public class MainWindowViewModel : ReactiveObject, IEnableAppState
 {
+  public MainWindowViewModel()
+  {
+    var appState = this.GetAppState()
+      .DefaultWorkingDuration;
+    try
+    {
+      WorkingTimeSpanIndex = WorkingTimeSpans.IndexOf(appState);
+    }
+    catch (Exception e)
+    {
+      this.Log()
+        .Info("Failed to load default working duration: {Error}", e.Message);
+    }
+
+    this.EnableAutoPersist(
+      (it, state) =>
+      {
+        state.DefaultWorkingDuration =
+          it.WorkingTimeSpans[it.WorkingTimeSpanIndex];
+      });
+  }
+
+  [DataMember]
   [Reactive]
   public int WorkingTimeSpanIndex { get; set; }
 

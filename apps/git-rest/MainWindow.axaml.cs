@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.ReactiveUI;
+using GitRest.Infrastructure;
 using GitRest.Service;
 using ReactiveUI;
 using Splat;

@@ -6,8 +6,6 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
-    <PublishSingleFile>true</PublishSingleFile>
-    <SelfContained>true</SelfContained>
   </PropertyGroup>
 
 
@@ -26,6 +24,7 @@
     <PackageReference Include="Splat.Serilog" Version="14.7.1" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageReference Include="System.Reactive" Version="6.0.0" />
+    <PackageReference Include="System.Text.Json" Version="7.0.3" />
   </ItemGroup>
 
   <ItemGroup>

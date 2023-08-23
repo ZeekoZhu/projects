@@ -1,15 +1,19 @@
 using System;
+using System.IO;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.ReactiveUI;
+using GitRest.Infrastructure;
 using GitRest.Service;
+using ReactiveUI;
 using Splat;
 using ILogger = Serilog.ILogger;
 
 namespace GitRest;
 
-public partial class App : Application
+public partial class App : Application, IEnableLocator
 {
   private readonly LinuxGitCommandMonitor _commandMonitor = new();
   private readonly TakeARestManager _takeARestManager = new();
@@ -38,12 +42,14 @@ public partial class App : Application
       .Where(
         it => it.EventArgs is GitCommandEventArgs)
       .Select(it => (GitCommandEventArgs)it.EventArgs)
+      .Where(_ => IsMonitoringGit)
       .Where(
+        // todo: add ignore list
         it => it.ProcessInfo.WorkingDirectory?.Contains(
           "project",
           StringComparison.OrdinalIgnoreCase) ?? true)
-      .Where(_ => IsMonitoringGit)
-      .Do(_ => Log.Information("Git command finished"))
+      .Where(it => it.IsGitCommit || it.IsGitPush)
+      .Do(_ => Log.Information("Git commit/push finished"))
       .Throttle(TimeSpan.FromSeconds(15))
       .Subscribe(
         _ =>
@@ -82,10 +88,36 @@ public partial class App : Application
     SetupMonitor();
   }
 
+  public override void OnFrameworkInitializationCompleted()
+  {
+    // Create the AutoSuspendHelper.
+    var suspension = new SuspendHelper(Desktop);
+    Locator.CurrentMutable.Register(() => suspension);
+    RxApp.SuspensionHost.CreateNewAppState = () => new AppState();
+    RxApp.SuspensionHost.SetupDefaultSuspendResume(
+      new JsonSuspensionDriver(GetAppStatePath(), typeof(AppState)));
+    suspension.OnFrameworkInitializationCompleted();
+    base.OnFrameworkInitializationCompleted();
+  }
+
+  private string GetAppStatePath()
+  {
+    // ~/.config/git-rest/state.json
+    var configPath = Environment.GetFolderPath(
+      Environment.SpecialFolder.ApplicationData);
+    var appConfigPath = Path.Combine(configPath, "git-rest");
+    if (!Directory.Exists(appConfigPath))
+    {
+      Directory.CreateDirectory(appConfigPath);
+    }
+
+    return Path.Combine(appConfigPath, "state.json");
+  }
+
   private void QuitMenuItem_OnClick(object? sender, EventArgs e)
   {
     // quit the app
-    Environment.Exit(0);
+    Desktop.Shutdown();
   }
 
   private void TrayIcon_OnClicked(object? sender, EventArgs e)
