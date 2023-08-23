@@ -35,6 +35,13 @@ public partial class App : Application
     Observable.FromEventPattern(
         _commandMonitor,
         nameof(_commandMonitor.GitCommandFinished))
+      .Where(
+        it => it.EventArgs is GitCommandEventArgs)
+      .Select(it => (GitCommandEventArgs)it.EventArgs)
+      .Where(
+        it => it.ProcessInfo.WorkingDirectory?.Contains(
+          "project",
+          StringComparison.OrdinalIgnoreCase) ?? true)
       .Where(_ => IsMonitoringGit)
       .Do(_ => Log.Information("Git command finished"))
       .Throttle(TimeSpan.FromSeconds(15))

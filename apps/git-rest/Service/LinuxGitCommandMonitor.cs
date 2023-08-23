@@ -3,8 +3,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using CliWrap;
-using CliWrap.Buffered;
 using Splat;
 
 namespace GitRest.Service;
@@ -46,23 +44,28 @@ public class LinuxGitCommandMonitor : IDisposable, IEnableLogger
     object sender,
     FileSystemEventArgs args)
   {
-    var gitProc = Process.GetProcesses()
-      .FirstOrDefault(p => _parser.IsGitCommand(p.ProcessName));
+    await Task.WhenAll(
+      Process.GetProcesses()
+        .Where(p => _parser.IsGitCommand(p.ProcessName))
+        .Select(HandleGitProcess)
+    );
+  }
 
-    if (gitProc == null)
-    {
-      // the git command has finished, ignore this event
-      return;
-    }
-
-    this.Log().Debug("Git command started: {Pid}", gitProc.Id);
+  private async Task HandleGitProcess(Process gitProc)
+  {
+    this.Log().Debug("Git command detected: {Pid}", gitProc.Id);
 
     try
     {
-      var gitCmd = _parser.Parse(await ResolveCommandlineByPid(gitProc.Id));
+      var cmdline = await ResolveCommandlineByPid(gitProc.Id);
+      var workingDirectory = ResolveCommandWorkingDirectoryByPid(gitProc.Id);
+      var processInfo = new SimpleProcessInfo(cmdline, workingDirectory);
+      var gitCmd = _parser.Parse(cmdline);
       var commandEventArgs = new GitCommandEventArgs(
         gitCmd.IsGitCommit,
-        gitCmd.IsGitPush);
+        gitCmd.IsGitPush,
+        processInfo
+      );
       GitCommandStarted?.Invoke(this, commandEventArgs);
 
       if (gitProc.HasExited)
@@ -85,36 +88,30 @@ public class LinuxGitCommandMonitor : IDisposable, IEnableLogger
           e,
           "Failed to retreive command info of {ProcessId}",
           gitProc.Id);
-      throw;
     }
   }
 
 
   private static async Task<string> ResolveCommandlineByPid(int pid)
   {
-    var psCmd = Cli.Wrap("ps")
-      .WithArguments(new[] { "-p", pid.ToString(), "-o", "cmd=" });
-    var psInfo = await psCmd.ExecuteBufferedAsync();
-    var commandline = psInfo.StandardOutput;
+    var commandline =
+      (await File.ReadAllTextAsync($"/proc/{pid}/cmdline")).Replace('\0', ' ');
     Serilog.Log.ForContext<LinuxGitCommandMonitor>()
-      .Debug("ps output: {Output}", commandline);
+      .Debug("resolve cmdline: {Output}", commandline);
     return commandline;
+  }
+
+  private static string? ResolveCommandWorkingDirectoryByPid(int pid)
+  {
+    var workingDirectory =
+      File.ResolveLinkTarget($"/proc/{pid}/cwd", true)?.FullName;
+    Serilog.Log.ForContext<LinuxGitCommandMonitor>()
+      .Debug("resolve cwd: {Output}", workingDirectory);
+    return workingDirectory;
   }
 
   public void Stop()
   {
     _watcher.EnableRaisingEvents = false;
-  }
-
-  public class GitCommandEventArgs
-  {
-    public GitCommandEventArgs(bool isGitCommit, bool isGitPush)
-    {
-      IsGitCommit = isGitCommit;
-      IsGitPush = isGitPush;
-    }
-
-    public bool IsGitCommit { get; }
-    public bool IsGitPush { get; }
   }
 }
