@@ -95,6 +95,9 @@ public class TakeARestManager : ReactiveObject, IEnableLocator
           "Should rest, you have been working {Duration}",
           args.Duration);
       alertWindowManager.ShowAlert();
+      // reset timer
+      IsRunning = false;
+      IsRunning = true;
     };
     Observable.FromEventPattern(
         commandMonitor,
