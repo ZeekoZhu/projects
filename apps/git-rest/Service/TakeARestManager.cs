@@ -106,7 +106,7 @@ public class TakeARestManager : ReactiveObject, IEnableLocator
       .Where(it => !ShouldIgnoreGitActivity(it.ProcessInfo))
       .Where(it => it.IsGitCommit || it.IsGitPush)
       .Do(_ => Log.Information("Git commit/push finished"))
-      .Throttle(TimeSpan.FromSeconds(15))
+      .Throttle(TimeSpan.FromSeconds(1))
       .Subscribe(
         _ =>
         {
