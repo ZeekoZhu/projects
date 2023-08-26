@@ -1,0 +1,43 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationManifest>app.manifest</ApplicationManifest>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    </PropertyGroup>
+
+
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.0.4"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.0.4"/>
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.0.4"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.0.4"/>
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.0.4"/>
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.0.4"/>
+        <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.0.2"/>
+        <PackageReference Include="CliWrap" Version="3.6.4"/>
+        <PackageReference Include="ReactiveUI.Fody" Version="19.4.1"/>
+        <PackageReference Include="Serilog.Sinks.Console" Version="4.1.0"/>
+        <PackageReference Include="Splat.Serilog" Version="14.7.1"/>
+        <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1"/>
+        <PackageReference Include="System.Reactive" Version="6.0.0"/>
+        <PackageReference Include="System.Text.Json" Version="7.0.3"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Watch Include="**\*.axaml"/>
+        <AvaloniaResource Include="Assets\*.*"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Update="MainWindow.ViewModel.cs">
+            <DependentUpon>MainWindow.axaml</DependentUpon>
+        </Compile>
+        <Compile Update="Component\TimerView.ViewModel.cs">
+            <DependentUpon>TimerView.axaml</DependentUpon>
+        </Compile>
+    </ItemGroup>
+</Project>

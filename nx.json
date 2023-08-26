@@ -24,6 +24,9 @@
   "generators": {
     "@nx-dotnet/core:application": {
       "solutionFile": "projects.sln"
+    },
+    "@nx-dotnet/core:library": {
+      "solutionFile": "projects.sln"
     }
   },
   "plugins": ["@nx-dotnet/core"]

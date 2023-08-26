@@ -1,0 +1,28 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:app="clr-namespace:GitRest"
+        xmlns:component="clr-namespace:GitRest.Component"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="GitRest.MainWindow"
+        Title="GitRest"
+        MinWidth="800"
+        MinHeight="450"
+        x:DataType="app:MainWindowViewModel">
+  <TabControl Margin="4">
+    <TabItem Header="General">
+      <component:TimerView />
+    </TabItem>
+    <TabItem Header="Config">
+      <component:ConfigView />
+    </TabItem>
+    <TabItem Header="DEBUG">
+      <StackPanel Spacing="16">
+        <Button Content="Alert" Click="AlertButton_OnClick" />
+        <Button Content="Move To Screen 1" Click="MoveToScreen1_OnClick" />
+        <Button Content="Move To Screen 2" Click="MoveToScreen2_OnClick" />
+      </StackPanel>
+    </TabItem>
+  </TabControl>
+</Window>
