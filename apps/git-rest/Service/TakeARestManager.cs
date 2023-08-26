@@ -47,12 +47,12 @@ public class TakeARestManager : ReactiveObject, IEnableLocator
             case false:
               return Observable.Return(TimeSpan.Zero);
             default:
-            {
-              var elapsedSeconds = (DateTime.Now - LastRestTime)
-                .TotalSeconds;
-              return Observable.Interval(TimeSpan.FromSeconds(1))
-                .Select(n => TimeSpan.FromSeconds(elapsedSeconds + n + 1));
-            }
+              {
+                var elapsedSeconds = (DateTime.Now - LastRestTime)
+                  .TotalSeconds;
+                return Observable.Interval(TimeSpan.FromSeconds(1))
+                  .Select(n => TimeSpan.FromSeconds(elapsedSeconds + n + 1));
+              }
           }
         })
       .Switch()
