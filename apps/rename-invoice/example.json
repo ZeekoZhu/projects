@@ -1,0 +1,44 @@
+{
+  "data": {
+    "checkCode": "",
+    "drawer": "",
+    "formType": "",
+    "invoiceAmountPreTax": "47.52",
+    "invoiceCode": "",
+    "invoiceDate": "2023年05月04日",
+    "invoiceDetails": [
+      {
+        "amount": "47.52",
+        "itemName": "*广播影视服务*电影票",
+        "quantity": "1",
+        "specification": "",
+        "tax": "0.48",
+        "taxRate": "1%",
+        "unit": "",
+        "unitPrice": "47.5247524752475"
+      }
+    ],
+    "invoiceNumber": "",
+    "invoiceTax": "0.48",
+    "invoiceType": "数电普通发票",
+    "machineCode": "",
+    "passwordArea": "",
+    "printedInvoiceCode": "",
+    "printedInvoiceNumber": "",
+    "purchaserBankAccountInfo": "",
+    "purchaserContactInfo": "",
+    "purchaserName": "有限公司",
+    "purchaserTaxNumber": "XRC5R",
+    "recipient": "",
+    "remarks": "",
+    "reviewer": "",
+    "sellerBankAccountInfo": "",
+    "sellerContactInfo": "",
+    "sellerName": "影业有限公司",
+    "sellerTaxNumber": "3TF88",
+    "specialTag": "",
+    "title": "电子发票(普通发票)",
+    "totalAmount": "48.00",
+    "totalAmountInWords": "肆拾捌圆整"
+  }
+}
