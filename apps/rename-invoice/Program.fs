@@ -9,7 +9,8 @@ open FSharp.Data
 type InvoiceInfo =
   { Price: float
     Date: DateOnly
-    Seller: string }
+    Seller: string
+    InvoiceNumber: string }
 
 /// <summary>
 /// Use AK&SK to initialize account Client
@@ -44,7 +45,8 @@ let extractInvoiceInfo (file: string) =
 
   { Price = data.Data.TotalAmount |> float
     Date = DateOnly.FromDateTime data.Data.InvoiceDate
-    Seller = data.Data.SellerName }
+    Seller = data.Data.SellerName
+    InvoiceNumber = data.Data.InvoiceNumber.JsonValue.AsString() }
 
 
 let root = RootCommand()
@@ -64,7 +66,7 @@ root.SetHandler(fun (ctx: InvocationContext) ->
   printfn $"%A{info}"
   // file name pattern yyyy-mm-dd_<seller>_<price>.pdf
   let dateStr = info.Date.ToString("yyyy-MM-dd")
-  let fileName = $"{dateStr}_{info.Seller}_{info.Price}.pdf"
+  let fileName = $"{dateStr}_{info.Seller}_{info.Price}_{info.InvoiceNumber}.pdf"
   let outputDir = ctx.ParseResult.GetValueForOption(outputDirOption)
   let outputPath = Path.Combine(outputDir, fileName)
   File.Copy(file, outputPath)
