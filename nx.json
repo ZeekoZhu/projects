@@ -5,15 +5,24 @@
       "runner": "nx-remotecache-minio",
       "options": {
         "bucket": "projects",
-        "region": "auto",
-        "cacheableOperations": ["build", "lint", "test", "e2e"]
+        "region": "auto"
       }
     }
   },
   "targetDefaults": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["production", "^production"]
+      "inputs": ["production", "^production"],
+      "cache": true
+    },
+    "lint": {
+      "cache": true
+    },
+    "test": {
+      "cache": true
+    },
+    "e2e": {
+      "cache": true
     }
   },
   "namedInputs": {

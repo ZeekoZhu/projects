@@ -1,2 +1,5 @@
 dist
 .chat
+.yarn
+
+/.nx/cache

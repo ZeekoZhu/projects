@@ -7,13 +7,13 @@
   },
   "private": true,
   "devDependencies": {
-    "@nrwl/js": "16.6.0",
-    "@nx-dotnet/core": "^1.22.0",
-    "@nx/workspace": "16.6.0",
-    "cz-git": "^1.7.1",
-    "husky": "^8.0.0",
-    "nx": "16.6.0",
-    "nx-remotecache-minio": "^4.2.0",
+    "@nrwl/js": "17.2.8",
+    "@nx-dotnet/core": "^2.1.2",
+    "@nx/workspace": "17.2.8",
+    "cz-git": "^1.8.0",
+    "husky": "^8.0.3",
+    "nx": "17.2.8",
+    "nx-remotecache-minio": "^17.0.0",
     "prettier": "^2.8.8",
     "zx": "^7.2.3"
   },
@@ -21,5 +21,9 @@
     "commitizen": {
       "path": "node_modules/cz-git"
     }
-  }
+  },
+  "volta": {
+    "node": "20.10.0"
+  },
+  "packageManager": "yarn@4.0.2"
 }
