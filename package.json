@@ -9,6 +9,7 @@
   "devDependencies": {
     "@nrwl/js": "17.2.8",
     "@nx-dotnet/core": "^2.1.2",
+    "@nx/js": "17.2.8",
     "@nx/workspace": "17.2.8",
     "cz-git": "^1.8.0",
     "husky": "^8.0.3",

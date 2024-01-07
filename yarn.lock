@@ -1792,6 +1792,7 @@ __metadata:
   dependencies:
     "@nrwl/js": "npm:17.2.8"
     "@nx-dotnet/core": "npm:^2.1.2"
+    "@nx/js": "npm:17.2.8"
     "@nx/workspace": "npm:17.2.8"
     cz-git: "npm:^1.8.0"
     husky: "npm:^8.0.3"
