@@ -8,3 +8,8 @@ public class NormalizerConfig(string type)
   public bool Lowercase { get; set; }
   public bool? StripAccents { get; set; }
 }
+
+public static class NormalizerTypes
+{
+  public const string BertNormalizer = "BerNormalizer";
+}
