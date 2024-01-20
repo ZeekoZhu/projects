@@ -1,0 +1,21 @@
+<mat-tab-group (selectedTabChange)="handleTabChange()">
+  <mat-tab label="Config">
+    <nu-monaco-editor
+      #configEditor
+      [ngModel]="configString()"
+      (ngModelChange)="configString.set($event)"
+      height="400px"
+      [options]="editorOptions"
+    ></nu-monaco-editor>
+  </mat-tab>
+  <mat-tab label="Result">
+    <nu-monaco-editor
+      #previewEditor
+      [disabled]="true"
+      height="400px"
+      [ngModel]="transformedCsvString()"
+      [options]="previewOptions"
+    >
+    </nu-monaco-editor>
+  </mat-tab>
+</mat-tab-group>
