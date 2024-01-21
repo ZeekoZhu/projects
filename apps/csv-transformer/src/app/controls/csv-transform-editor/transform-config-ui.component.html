@@ -1,33 +1,28 @@
 <div class="w-full">
   @if (!showJsonEditor()) {
-    <div>
-      <button mat-button (click)="showJsonEditor.set(true)">Edit JSON</button>
-    </div>
-    <mat-list cdkDropList (cdkDropListDropped)="handleDrop($event)" role="list">
-      @if (config(); as c) {
-        @for (col of c.columns; track col.id) {
-          <mat-list-item role="listitem" cdkDrag class="!cursor-move">
-          <span matListItemTitle>
-          {{ col.name }}
-          </span>
-            <span matListItemLine>
-            cell value here
-          </span>
-          </mat-list-item>
-        }
-      }
-    </mat-list>
+  <div class="flex gap-2">
+    <button mat-button (click)="showJsonEditor.set(true)">Edit JSON</button>
+    <button mat-button (click)="handleAddColumn()">Add Column</button>
+  </div>
+  <mat-list cdkDropList (cdkDropListDropped)="handleDrop($event)" role="list">
+    @if (config(); as c) { @for (col of c.columns; track col.id) {
+    <mat-list-item role="listitem" cdkDrag class="!cursor-move">
+      <span matListItemTitle>{{ col.name }}</span>
+      <projects-column-description matListItemLine [column]="col" />
+    </mat-list-item>
+    } }
+  </mat-list>
   } @else {
-    <div>
-      <button mat-button (click)="showJsonEditor.set(false)">Back</button>
-    </div>
+  <div>
+    <button mat-button (click)="showJsonEditor.set(false)">Back</button>
+  </div>
 
-    <nu-monaco-editor
-      #configEditor
-      [ngModel]="editorContent()"
-      (ngModelChange)="editorContent.set($event)"
-      height="400px"
-      [options]="editorOptions"
-    ></nu-monaco-editor>
+  <nu-monaco-editor
+    #configEditor
+    [ngModel]="editorContent()"
+    (ngModelChange)="editorContent.set($event)"
+    height="400px"
+    [options]="editorOptions"
+  ></nu-monaco-editor>
   }
 </div>

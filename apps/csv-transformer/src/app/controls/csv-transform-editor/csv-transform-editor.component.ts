@@ -1,4 +1,14 @@
-import { AfterViewInit, Component, computed, effect, inject, Input, signal, Signal, ViewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  effect,
+  inject,
+  Input,
+  signal,
+  Signal,
+  ViewChild,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import Papa from 'papaparse';
@@ -10,16 +20,16 @@ import { TransformConfigService } from './transform-config.service';
 @Component({
   selector: 'projects-csv-transform-editor',
   standalone: true,
-  providers: [ TransformConfigService ],
+  providers: [TransformConfigService],
   imports: [
     CommonModule,
     MatTab,
     MatTabGroup,
     NuMonacoEditorComponent,
     FormsModule,
-    TransformConfigUiComponent
+    TransformConfigUiComponent,
   ],
-  templateUrl: './csv-transform-editor.component.html'
+  templateUrl: './csv-transform-editor.component.html',
 })
 export class CsvTransformEditorComponent implements AfterViewInit {
   transformConfig = inject(TransformConfigService);
@@ -29,7 +39,7 @@ export class CsvTransformEditorComponent implements AfterViewInit {
   dataColumns!: Signal<string[]>;
   previewOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
     language: 'csv',
-    readOnly: true
+    readOnly: true,
   };
 
   get config() {
@@ -52,7 +62,7 @@ export class CsvTransformEditorComponent implements AfterViewInit {
   transformedCsvString = computed(() => {
     const data = [
       this.config().columns.map((column) => column.name),
-      ...this.transformedData()
+      ...this.transformedData(),
     ];
     return Papa.unparse(data);
   });
@@ -63,15 +73,17 @@ export class CsvTransformEditorComponent implements AfterViewInit {
   configEditorRef?: NuMonacoEditorComponent;
 
   constructor() {
-    effect(() => {
-      this.transformConfig.reset(this.dataColumns());
-    }, {
-      allowSignalWrites: true
-    });
+    effect(
+      () => {
+        this.transformConfig.reset(this.dataColumns());
+      },
+      {
+        allowSignalWrites: true,
+      }
+    );
   }
 
   ngAfterViewInit(): void {
     this.configEditorRef?.editor?.layout();
   }
 }
-

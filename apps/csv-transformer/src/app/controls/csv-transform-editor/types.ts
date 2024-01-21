@@ -15,7 +15,15 @@ export function createInitialColumnMappingConfig(
     columns: dataColumns.map((columnName) => ({
       name: columnName,
       id: nanoid(),
-      cellIndex: dataColumns.indexOf(columnName)
-    }))
+      cellIndex: dataColumns.indexOf(columnName),
+    })),
   };
+}
+
+export interface IEditConstantColumnDialogData
+  extends Pick<IConstantColumn, 'name' | 'cellValue'> {}
+
+export interface IEditConstantColumnDialogResult {
+  name: string;
+  cellValue: string;
 }
