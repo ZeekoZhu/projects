@@ -10,6 +10,7 @@
       "executor": "@angular-devkit/build-angular:application",
       "outputs": ["{options.outputPath}"],
       "options": {
+        "allowedCommonJsDependencies": ["papaparse"],
         "outputPath": "dist/apps/csv-transformer",
         "index": "apps/csv-transformer/src/index.html",
         "browser": "apps/csv-transformer/src/main.ts",
