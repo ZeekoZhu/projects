@@ -5,7 +5,6 @@ import {
   effect,
   inject,
   Input,
-  signal,
   Signal,
   ViewChild,
 } from '@angular/core';
