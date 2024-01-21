@@ -1,56 +1,56 @@
 import {
   Component,
   effect,
-  inject,
+  inject, Injector,
   signal,
   Signal,
   untracked,
-  ViewChild,
+  ViewChild
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ICsvColumnMappingConfig,
-  IEditConstantColumnDialogResult,
-  ITransformedColumn,
+  IEditConstantColumnDialogResult, IEditValueColumnDialogResult,
+  ITransformedColumn
 } from './types';
 import {
-  MatList,
-  MatListItem,
-  MatListItemLine,
-  MatListItemTitle,
+  MatListModule
 } from '@angular/material/list';
 import {
   CdkDrag,
   CdkDragDrop,
   CdkDropList,
-  moveItemInArray,
+  moveItemInArray
 } from '@angular/cdk/drag-drop';
 import { TransformConfigService } from './transform-config.service';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { NuMonacoEditorComponent } from '@ng-util/monaco-editor';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { EditConstantColumnDialogComponent } from './edit-constant-column-dialog.component';
 import { nanoid } from 'nanoid';
 import { ColumnDescriptionComponent } from './column-description.component';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { EditValueColumnDialogComponent } from './edit-value-column-dialog.component';
 
 @Component({
   selector: 'projects-transform-config-ui',
   standalone: true,
   imports: [
-    CommonModule,
-    MatListItem,
-    MatList,
-    MatListItemLine,
-    MatListItemTitle,
-    CdkDropList,
     CdkDrag,
-    MatButton,
-    NuMonacoEditorComponent,
-    FormsModule,
+    CdkDropList,
     ColumnDescriptionComponent,
+    CommonModule,
+    FormsModule,
+    MatButton,
+    MatIconButton,
+    MatIconModule,
+    MatListModule,
+    NuMonacoEditorComponent,
+    MatMenuModule
   ],
-  templateUrl: './transform-config-ui.component.html',
+  templateUrl: './transform-config-ui.component.html'
 })
 export class TransformConfigUiComponent {
   transformConfig = inject(TransformConfigService);
@@ -58,7 +58,7 @@ export class TransformConfigUiComponent {
     this.transformConfig.state.signal('config');
   showJsonEditor = signal(false);
   editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
-    language: 'json',
+    language: 'json'
   };
   editorContent = signal('');
 
@@ -95,16 +95,55 @@ export class TransformConfigUiComponent {
     const dialogRef = this.dialog.open(EditConstantColumnDialogComponent, {
       data: {
         name: '',
-        cellValue: '',
-      },
+        cellValue: ''
+      }
     });
     dialogRef
       .afterClosed()
       .subscribe((res: IEditConstantColumnDialogResult) => {
-        this.transformConfig.addColumn({
-          id: nanoid(),
-          ...res,
-        });
+        if (res) {
+          this.transformConfig.addColumn({
+            id: nanoid(),
+            ...res
+          });
+        }
       });
+  }
+
+  private injector = inject(Injector);
+
+  handleEditColumn(column: ITransformedColumn) {
+    if ('cellValue' in column) {
+      const dialogRef = this.dialog.open(EditConstantColumnDialogComponent, {
+        data: {
+          name: column.name,
+          cellValue: column.cellValue
+        }
+      });
+      dialogRef
+        .afterClosed()
+        .subscribe((res: IEditConstantColumnDialogResult) => {
+          this.transformConfig.updateColumn({
+            ...column,
+            ...res
+          });
+        });
+    } else if ('cellIndex' in column) {
+      const dialogRef = this.dialog.open(EditValueColumnDialogComponent, {
+        data: {
+          name: column.name,
+          cellIndex: column.cellIndex
+        },
+        injector: this.injector
+      });
+      dialogRef
+        .afterClosed()
+        .subscribe((res: IEditValueColumnDialogResult) => {
+          this.transformConfig.updateColumn({
+            ...column,
+            ...res
+          });
+        });
+    }
   }
 }
