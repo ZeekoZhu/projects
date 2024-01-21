@@ -1,0 +1,12 @@
+<div class="flex h-[400px]">
+  <projects-transform-config-ui class="flex-1 min-w-0" />
+  <nu-monaco-editor
+    class="flex-[2_1_0] min-w-0"
+    #previewEditor
+    [disabled]="true"
+    height="400px"
+    [ngModel]="transformedCsvString()"
+    [options]="previewOptions"
+  >
+  </nu-monaco-editor>
+</div>

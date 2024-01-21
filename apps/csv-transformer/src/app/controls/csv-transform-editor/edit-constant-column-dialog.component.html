@@ -1,0 +1,16 @@
+<div mat-dialog-content>
+  <div [formGroup]="form" class="flex flex-col gap-2">
+    <mat-form-field>
+      <mat-label>Column name</mat-label>
+      <input type="text" matInput formControlName="name" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Cell value</mat-label>
+      <input type="text" matInput formControlName="cellValue" />
+    </mat-form-field>
+  </div>
+</div>
+<div mat-dialog-actions>
+  <button mat-button mat-dialog-close>Cancel</button>
+  <button mat-button [mat-dialog-close]="form.value">Save</button>
+</div>
