@@ -7,8 +7,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 @Component({
   selector: 'projects-value-column-description',
   standalone: true,
-  imports: [ CommonModule ],
-  templateUrl: './value-column-description.component.html'
+  imports: [CommonModule],
+  templateUrl: './value-column-description.component.html',
 })
 export class ValueColumnDescriptionComponent {
   transformConfig = inject(TransformConfigService);
@@ -17,7 +17,7 @@ export class ValueColumnDescriptionComponent {
   @Input({
     transform: (value: IConstantColumn | IValueColumn): IValueColumn =>
       value as IValueColumn,
-    required: true
+    required: true,
   })
   set column(value: IValueColumn) {
     this._column.set(value);

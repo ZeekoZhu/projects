@@ -9,10 +9,16 @@
     <mat-list-item role="listitem" cdkDrag class="!cursor-move">
       <span matListItemTitle>{{ col.name }}</span>
       <projects-column-description matListItemLine [column]="col" />
-      <span matListItemMeta><button [matMenuTriggerFor]="menu" mat-icon-button><mat-icon>more_vert</mat-icon></button></span>
+      <span matListItemMeta
+        ><button [matMenuTriggerFor]="menu" mat-icon-button>
+          <mat-icon>more_vert</mat-icon>
+        </button></span
+      >
       <mat-menu #menu>
         <button mat-menu-item (click)="handleEditColumn(col)">Edit</button>
-        <button mat-menu-item (click)="transformConfig.removeColumn(col.id)">Delete</button>
+        <button mat-menu-item (click)="transformConfig.removeColumn(col.id)">
+          Delete
+        </button>
       </mat-menu>
     </mat-list-item>
     } }

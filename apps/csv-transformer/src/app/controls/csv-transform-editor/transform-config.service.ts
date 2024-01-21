@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import {
   createInitialColumnMappingConfig,
   ICsvColumnMappingConfig,
-  ITransformedColumn
+  ITransformedColumn,
 } from './types';
 import { rxState } from '@rx-angular/state';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -18,7 +18,7 @@ export class TransformConfigService {
   reset(dataColumns: string[]) {
     this.state.set({
       config: createInitialColumnMappingConfig(dataColumns),
-      dataColumns: [ ...dataColumns ]
+      dataColumns: [...dataColumns],
     });
   }
 
@@ -45,24 +45,24 @@ export class TransformConfigService {
   updateColumn(column: ITransformedColumn) {
     this.state.set({
       config: {
-        columns: this.state.get().config.columns.map((it) =>
-          it.id === column.id ? column : it
-        )
-      }
+        columns: this.state
+          .get()
+          .config.columns.map((it) => (it.id === column.id ? column : it)),
+      },
     });
   }
 
   addColumn(col: ITransformedColumn) {
     this.state.set({
-      config: { columns: [ ...this.state.get().config.columns, col ] }
+      config: { columns: [...this.state.get().config.columns, col] },
     });
   }
 
   removeColumn(id: string) {
     this.state.set({
       config: {
-        columns: this.state.get().config.columns.filter((it) => it.id !== id)
-      }
+        columns: this.state.get().config.columns.filter((it) => it.id !== id),
+      },
     });
   }
 }

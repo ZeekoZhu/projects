@@ -8,7 +8,7 @@
       <mat-label>Cell value</mat-label>
       <mat-select formControlName="cellIndex">
         @for (opt of columnOptions(); track opt.value) {
-          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+        <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
         }
       </mat-select>
     </mat-form-field>

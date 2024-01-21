@@ -1,26 +1,26 @@
 import {
   Component,
   effect,
-  inject, Injector,
+  inject,
+  Injector,
   signal,
   Signal,
   untracked,
-  ViewChild
+  ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
   ICsvColumnMappingConfig,
-  IEditConstantColumnDialogResult, IEditValueColumnDialogResult,
-  ITransformedColumn
+  IEditConstantColumnDialogResult,
+  IEditValueColumnDialogResult,
+  ITransformedColumn,
 } from './types';
-import {
-  MatListModule
-} from '@angular/material/list';
+import { MatListModule } from '@angular/material/list';
 import {
   CdkDrag,
   CdkDragDrop,
   CdkDropList,
-  moveItemInArray
+  moveItemInArray,
 } from '@angular/cdk/drag-drop';
 import { TransformConfigService } from './transform-config.service';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -48,9 +48,9 @@ import { EditValueColumnDialogComponent } from './edit-value-column-dialog.compo
     MatIconModule,
     MatListModule,
     NuMonacoEditorComponent,
-    MatMenuModule
+    MatMenuModule,
   ],
-  templateUrl: './transform-config-ui.component.html'
+  templateUrl: './transform-config-ui.component.html',
 })
 export class TransformConfigUiComponent {
   transformConfig = inject(TransformConfigService);
@@ -58,7 +58,7 @@ export class TransformConfigUiComponent {
     this.transformConfig.state.signal('config');
   showJsonEditor = signal(false);
   editorOptions: monaco.editor.IStandaloneEditorConstructionOptions = {
-    language: 'json'
+    language: 'json',
   };
   editorContent = signal('');
 
@@ -95,8 +95,8 @@ export class TransformConfigUiComponent {
     const dialogRef = this.dialog.open(EditConstantColumnDialogComponent, {
       data: {
         name: '',
-        cellValue: ''
-      }
+        cellValue: '',
+      },
     });
     dialogRef
       .afterClosed()
@@ -104,7 +104,7 @@ export class TransformConfigUiComponent {
         if (res) {
           this.transformConfig.addColumn({
             id: nanoid(),
-            ...res
+            ...res,
           });
         }
       });
@@ -117,33 +117,31 @@ export class TransformConfigUiComponent {
       const dialogRef = this.dialog.open(EditConstantColumnDialogComponent, {
         data: {
           name: column.name,
-          cellValue: column.cellValue
-        }
+          cellValue: column.cellValue,
+        },
       });
       dialogRef
         .afterClosed()
         .subscribe((res: IEditConstantColumnDialogResult) => {
           this.transformConfig.updateColumn({
             ...column,
-            ...res
+            ...res,
           });
         });
     } else if ('cellIndex' in column) {
       const dialogRef = this.dialog.open(EditValueColumnDialogComponent, {
         data: {
           name: column.name,
-          cellIndex: column.cellIndex
+          cellIndex: column.cellIndex,
         },
-        injector: this.injector
+        injector: this.injector,
       });
-      dialogRef
-        .afterClosed()
-        .subscribe((res: IEditValueColumnDialogResult) => {
-          this.transformConfig.updateColumn({
-            ...column,
-            ...res
-          });
+      dialogRef.afterClosed().subscribe((res: IEditValueColumnDialogResult) => {
+        this.transformConfig.updateColumn({
+          ...column,
+          ...res,
         });
+      });
     }
   }
 }
