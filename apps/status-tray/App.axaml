@@ -3,16 +3,7 @@
              x:Class="Projects.StatusTray.App"
              RequestedThemeVariant="Default">
   <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
-
   <Application.Styles>
     <FluentTheme />
   </Application.Styles>
-  <TrayIcon.Icons>
-    <TrayIcons>
-      <TrayIcon Icon="/Assets/red-icon-256x256.png"
-                Clicked="TrayIcon_OnClicked"
-                ToolTipText="Avalonia Tray Icon ToolTip">
-      </TrayIcon>
-    </TrayIcons>
-  </TrayIcon.Icons>
 </Application>

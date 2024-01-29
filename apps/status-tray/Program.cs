@@ -14,9 +14,10 @@ static class Program
   [STAThread]
   public static void Main(string[] args)
   {
-    Log.Logger = SerilogHelper.CreateApplicationLogger("StatusTray")
+    Log.Logger = SerilogHelper.CreateApplicationLogger("Projects")
       .CreateLogger();
     X11Helper.SetGlobalScalingFactor();
+    _ = new Bootstrap();
     BuildAvaloniaApp()
       .StartWithClassicDesktopLifetime(args, ShutdownMode.OnExplicitShutdown);
   }
@@ -27,6 +28,5 @@ static class Program
       .UsePlatformDetect()
       .With(new X11PlatformOptions { EnableIme = true })
       .WithInterFont()
-      .LogToTrace()
       .AddLog();
 }

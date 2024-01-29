@@ -21,6 +21,12 @@ public class SerilogSink : ILogSink
     object? source,
     string messageTemplate)
   {
+    if (source != null)
+    {
+      _logger.ForContext("SourceContext", source.GetType().FullName)
+        .Write(TranslateLevel(level), messageTemplate);
+    }
+
     _logger.Write(TranslateLevel(level), messageTemplate);
   }
 
@@ -31,6 +37,11 @@ public class SerilogSink : ILogSink
     string messageTemplate,
     params object?[] propertyValues)
   {
+    if (source != null)
+    {
+      _logger.ForContext("SourceContext", source.GetType().FullName)
+        .Write(TranslateLevel(level), messageTemplate, propertyValues);
+    }
     _logger.Write(TranslateLevel(level), messageTemplate, propertyValues);
   }
 
@@ -58,7 +69,7 @@ public static class AppExtension
   {
     Logger.Sink =
       new SerilogSink();
-    Logger.Sink.Log(LogEventLevel.Debug, "App", null, "Log is ready");
+    Logger.Sink.Log(LogEventLevel.Debug, "Projects.App", null, "Log is ready");
     return builder;
   }
 }
