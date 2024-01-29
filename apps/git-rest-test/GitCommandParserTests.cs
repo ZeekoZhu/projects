@@ -17,37 +17,38 @@ public class GitCommandParserTests
   public void IsGitCommand_GitProcessName_ReturnsTrue()
   {
     var result = _gitCommandParser.IsGitCommand("git");
-    Assert.IsTrue(result);
+    Assert.That(result, Is.True);
   }
 
   [Test]
   public void IsGitCommand_NonGitProcessName_ReturnsFalse()
   {
     var result = _gitCommandParser.IsGitCommand("notgit");
-    Assert.IsFalse(result);
+    Assert.That(result, Is.False);
   }
 
   [Test]
   public void Parse_CommitCommand_ReturnsTrueForIsCommit()
   {
     var result = _gitCommandParser.Parse("git commit -m \"test\"");
-    Assert.IsTrue(result.IsGitCommit);
-    Assert.IsFalse(result.IsGitPush);
+    Assert.That(result, Is.True);
+    Assert.That(result,Is.False);
   }
 
   [Test]
   public void Parse_PushCommand_ReturnsTrueForIsPush()
   {
     var result = _gitCommandParser.Parse("git push origin master");
-    Assert.IsFalse(result.IsGitCommit);
-    Assert.IsTrue(result.IsGitPush);
+    Assert.That(result,Is.False);
+    Assert.That(result,Is.True);
   }
 
   [Test]
   public void Parse_AddCommand_ReturnsFalseForIsCommitAndIsPush()
   {
-    var result = _gitCommandParser.Parse("git -c credential.helper= -c core.quotepath=false -c log.showSignature=false add --ignore-errors -A -- apps/git-rest/Service/GitCommandParser.cs");
-    Assert.IsFalse(result.IsGitCommit);
-    Assert.IsFalse(result.IsGitPush);
+    var result = _gitCommandParser.Parse(
+      "git -c credential.helper= -c core.quotepath=false -c log.showSignature=false add --ignore-errors -A -- apps/git-rest/Service/GitCommandParser.cs");
+    Assert.That(result,Is.False);
+    Assert.That(result,Is.False);
   }
 }
