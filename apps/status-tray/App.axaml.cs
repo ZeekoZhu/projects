@@ -16,6 +16,7 @@ namespace Projects.StatusTray;
 
 public partial class App : Application, IEnableLogger
 {
+  private MainWindow _mainWindow;
   public override void Initialize() => AvaloniaXamlLoader.Load(this);
 
   public AppViewModel ViewModel { get; set; } = new();
@@ -34,15 +35,24 @@ public partial class App : Application, IEnableLogger
       ViewModel.TrayIcon.Select(it => new WindowIcon(it))
         .ObserveOn(RxApp.MainThreadScheduler)
         .BindTo(icon, it => it.Icon);
+      // initialize main window
+      _mainWindow = new MainWindow();
+      _mainWindow.Hide();
     }
 
     base.OnFrameworkInitializationCompleted();
   }
 
-  private static void TrayIcon_OnClicked(object? sender, EventArgs e)
+  private void TrayIcon_OnClicked(object? sender, EventArgs e)
   {
-    var mainWindow = new MainWindow();
-    mainWindow.Show();
+    if (_mainWindow.IsVisible)
+    {
+      _mainWindow.Hide();
+    }
+    else
+    {
+      _mainWindow.Show();
+    }
   }
 }
 
