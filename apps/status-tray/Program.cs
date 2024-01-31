@@ -1,6 +1,7 @@
 ﻿using Avalonia;
 using System;
 using Avalonia.Controls;
+using Avalonia.ReactiveUI;
 using Projects.AvaloniaUtils;
 using Serilog;
 
@@ -28,5 +29,6 @@ static class Program
       .UsePlatformDetect()
       .With(new X11PlatformOptions { EnableIme = true })
       .WithInterFont()
-      .AddLog();
+      .AddLog()
+      .UseReactiveUI();
 }

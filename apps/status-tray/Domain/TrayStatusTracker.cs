@@ -1,23 +1,29 @@
 using System;
 using System.Collections.Generic;
-using System.Reactive.Linq;
+using System.Linq;
 using DynamicData;
+using Splat;
 
 namespace Projects.StatusTray.Domain;
 
-public class TrayStatusTracker : StatusTracker
+public class TrayStatusTracker : StatusTracker, IEnableLogger
 {
   public TrayStatusTracker(IEnumerable<IStatusProvider> statusProviders) : base(
     statusProviders)
   {
-    StateUpdates = StatusListUpdates.Connect().Count(it => it.Count == 0)
-      .Select(it => it == 0 ? StatusState.Green : StatusState.Red);
+    StateUpdates = StatusListUpdates.Connect()
+      .QueryWhenChanged(it =>
+      {
+        return it.Items.All(s => s.State == StatusState.Green)
+          ? StatusState.Green
+          : StatusState.Red;
+      });
   }
 
   public IObservable<StatusState> StateUpdates { get; }
 }
 
-public class StatusTracker
+public class StatusTracker : IEnableLogger
 {
   private readonly SourceCache<StatusInfo, string> _activeStatusInfos =
     new(it => it.Id);
@@ -26,13 +32,14 @@ public class StatusTracker
   {
     foreach (var provider in statusProvider)
     {
+      StatusListUpdates = _activeStatusInfos.AsObservableCache();
       provider.StatusUpdates.Subscribe(status =>
       {
+        this.Log().Debug("{Count} Status got update", status.Count);
+        this.Log().Debug("Status: {Status}", status);
         _activeStatusInfos.AddOrUpdate(status);
       });
     }
-
-    StatusListUpdates = _activeStatusInfos.AsObservableCache();
   }
 
   public IObservableCache<StatusInfo, string> StatusListUpdates { get; }
