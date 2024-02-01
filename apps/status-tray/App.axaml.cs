@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Reactive.Linq;
 using Avalonia;
 using Avalonia.Controls;
@@ -68,11 +67,13 @@ public class AppViewModel : ReactiveObject, IEnableLocator
 
   public AppViewModel()
   {
-    var statusProviders = new List<IStatusProvider>
+    if (Design.IsDesignMode)
     {
-      this.GetService<GitLabPrPipelineStatusProvider>()
-    };
-    var tracker = new TrayStatusTracker(statusProviders);
+      TrayIcon = Observable.Return(GreenIcon);
+      return;
+    }
+
+    var tracker = this.GetService<TrayStatusTracker>();
     TrayIcon =
       tracker.StateUpdates
         .Select(
@@ -86,5 +87,5 @@ public class AppViewModel : ReactiveObject, IEnableLocator
         .LoggedCatch(this);
   }
 
-  public IObservable<Bitmap> TrayIcon { get; set; }
+  public IObservable<Bitmap> TrayIcon { get; }
 }

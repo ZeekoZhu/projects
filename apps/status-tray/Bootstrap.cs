@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
@@ -47,6 +48,12 @@ public class Bootstrap
     services.AddSingleton<HttpLogHandler>();
 
     services.AddSingleton<GitLabPrPipelineStatusProvider>();
+    services.AddSingleton(sp =>
+    {
+      var providers = new List<IStatusProvider>
+        { sp.GetRequiredService<GitLabPrPipelineStatusProvider>() };
+      return new TrayStatusTracker(providers);
+    });
   }
 }
 
