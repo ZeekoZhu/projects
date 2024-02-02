@@ -50,8 +50,12 @@ public class Bootstrap
     services.AddSingleton<GitLabPrPipelineStatusProvider>();
     services.AddSingleton(sp =>
     {
+      //*
+      var providers = new List<IStatusProvider>();
+      /*/
       var providers = new List<IStatusProvider>
         { sp.GetRequiredService<GitLabPrPipelineStatusProvider>() };
+      //*/
       return new TrayStatusTracker(providers);
     });
   }

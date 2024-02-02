@@ -32,4 +32,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\libs\avalonia-utils\Projects.AvaloniaUtils.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Watch Include="**\*.axaml" />
+  </ItemGroup>
 </Project>

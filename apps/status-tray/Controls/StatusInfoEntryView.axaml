@@ -1,0 +1,65 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:domain="clr-namespace:Projects.StatusTray.Domain"
+             xmlns:conv="clr-namespace:Projects.StatusTray.Converters"
+             xmlns:ctrl="clr-namespace:Projects.StatusTray.Controls"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="300"
+             x:DataType="ctrl:StatusInfoEntryViewModel"
+             x:Class="Projects.StatusTray.Controls.StatusInfoEntryView">
+  <UserControl.Resources>
+    <conv:IsEqualToBooleanConverter x:Key="StateToBooleanConverter" />
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="Button.item">
+      <Setter Property="Margin" Value="8,0">
+      </Setter>
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="Transitions">
+        <Transitions>
+          <BrushTransition Property="Background" Duration="0:0:0.2" />
+        </Transitions>
+      </Setter>
+      <Setter Property="CornerRadius" Value="{StaticResource ControlCornerRadius}" />
+    </Style>
+    <Style Selector="Button.red">
+      <Setter Property="Background" Value="{StaticResource BackgroundSecondaryRed}" />
+    </Style>
+    <Style Selector="Button.red TextBlock.name">
+      <Setter Property="Foreground" Value="{StaticResource BrushOnSecondaryRed}" />
+    </Style>
+    <Style Selector="Button.red:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource BackgroundSecondaryHoverRed}" />
+    </Style>
+    <Style Selector="Button.green">
+      <Setter Property="Background" Value="{StaticResource BackgroundSecondaryGreen}" />
+    </Style>
+    <Style Selector="Button.green TextBlock.name">
+      <Setter Property="Foreground" Value="{StaticResource BrushOnSecondaryGreen}" />
+    </Style>
+    <Style Selector="Button.green:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource BackgroundSecondaryHoverGreen}" />
+    </Style>
+  </UserControl.Styles>
+
+  <StackPanel HorizontalAlignment="Stretch">
+    <Button
+      Command="{Binding OpenDetailCommand}"
+      Classes="item"
+      Classes.red="{Binding Info.State
+                      ,Mode=OneWay
+                      ,FallbackValue=False
+                      ,Converter={StaticResource StateToBooleanConverter}
+                      ,ConverterParameter={x:Static domain:StatusState.Red}}"
+      Classes.green="{Binding Info.State
+                      ,Mode=OneWay
+                      ,FallbackValue=False
+                      ,Converter={StaticResource StateToBooleanConverter}
+                      ,ConverterParameter={x:Static domain:StatusState.Green}}">
+      <StackPanel Orientation="Horizontal">
+        <TextBlock Classes="name" Text="{Binding Info.Name, FallbackValue=Empty,Mode=OneWay}" />
+      </StackPanel>
+    </Button>
+  </StackPanel>
+</UserControl>

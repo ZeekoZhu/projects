@@ -30,9 +30,9 @@ public class StatusTracker : IEnableLogger
 
   public StatusTracker(IEnumerable<IStatusProvider> statusProvider)
   {
+    StatusListUpdates = _activeStatusInfos.AsObservableCache();
     foreach (var provider in statusProvider)
     {
-      StatusListUpdates = _activeStatusInfos.AsObservableCache();
       provider.StatusUpdates.Subscribe(status =>
       {
         this.Log().Debug("{Count} Status got update", status.Count);

@@ -64,10 +64,7 @@ public class GitLabPrPipelineStatusProvider : IStatusProvider, IEnableLogger
       Id = $"gitlab-mr-{it.ProjectId}-{it.Id}",
       Name = $"MR #{it.Iid} {it.Title}",
       State = StatusState.Red,
-      OnGoToDetails = (info) =>
-      {
-        // todo: Open browser
-      }
+      DetailWebUrl = it.WebUrl
     }).ToList();
   }
 }

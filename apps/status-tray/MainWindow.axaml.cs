@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Reactive.Linq;
 using Avalonia.Controls;
+using Avalonia.ReactiveUI;
 using DynamicData;
 using Projects.AvaloniaUtils;
 using Projects.StatusTray.Domain;
@@ -10,13 +11,13 @@ using ReactiveUI;
 
 namespace Projects.StatusTray;
 
-public partial class MainWindow : Window, IEnableLocator
+public partial class MainWindow : ReactiveWindow<MainWindowViewModel>, IEnableLocator
 {
   public MainWindow()
   {
     InitializeComponent();
     //*
-    DataContext = new DesignMainWindowViewModel();
+    ViewModel = new DesignMainWindowViewModel();
     /*/
     DataContext = new MainWindowViewModel(this.GetService<TrayStatusTracker>());
     //*/
@@ -52,16 +53,16 @@ internal class DesignStatusProvider : IStatusProvider
         new()
         {
           Id = "green-design-status-provider",
-          Name = "Green Design Status Provider",
+          Name = "Green Status Provider",
           State = StatusState.Green,
-          OnGoToDetails = _ => { }
+          DetailWebUrl = "https://wikipedia.com"
         },
         new()
         {
           Id = "red-design-status-provider",
           Name = "Red Design Status Provider",
           State = StatusState.Red,
-          OnGoToDetails = _ => { }
+          DetailWebUrl = "https://google.com"
         },
       });
 }

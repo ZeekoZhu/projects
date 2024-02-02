@@ -1,13 +1,18 @@
-using System;
+using ReactiveUI.Fody.Helpers;
 
 namespace Projects.StatusTray.Domain;
 
 public class StatusInfo
 {
-  public string Id { get; set; }
-  public string Name { get; set; }
-  public StatusState State { get; set; }
-  public Action<StatusInfo> OnGoToDetails { get; set; }
+  [Reactive]
+  public required string Id { get; set; }
+  [Reactive]
+  public required string Name { get; set; }
+
+  [Reactive] public StatusState State { get; set; } = StatusState.Red;
+
+  [Reactive]
+  public required string DetailWebUrl { get; set; }
 
   public override string ToString()
   {
