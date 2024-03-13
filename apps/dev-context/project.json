@@ -33,6 +33,14 @@
     },
     "lint": {
       "executor": "@nx-dotnet/core:format"
+    },
+    "publish": {
+      "executor": "@nx-dotnet/core:publish",
+      "options": {
+        "configuration": "Release",
+        "runtime": "linux-x64",
+        "extraParameters": "-P:PublishSingleFile=true"
+      }
     }
   },
   "tags": []
