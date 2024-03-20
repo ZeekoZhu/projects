@@ -1,6 +1,7 @@
 ﻿open System.CommandLine
 open System.CommandLine.Builder
 open System.CommandLine.Parsing
+open Projects.DevContext
 open Projects.DevContext.ContextProviders
 open Projects.DevContext.Core
 open Serilog
@@ -8,7 +9,7 @@ open Serilog.Events
 
 Log.Logger <-
   LoggerConfiguration()
-    .MinimumLevel.Debug()
+    .ReadFrom.Configuration(AppConfig.configuration())
     .WriteTo.Console(standardErrorFromLevel = LogEventLevel.Verbose)
     .CreateLogger()
 
