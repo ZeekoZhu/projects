@@ -9,8 +9,12 @@ open Serilog.Events
 
 Log.Logger <-
   LoggerConfiguration()
-    .ReadFrom.Configuration(AppConfig.configuration())
-    .WriteTo.Console(standardErrorFromLevel = LogEventLevel.Verbose)
+    .ReadFrom.Configuration(AppConfig.configuration ())
+    .WriteTo.Console(
+      outputTemplate =
+        "[{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}] [{Level:u3}] {SourceContext}{NewLine}{Message:lj}{NewLine}{Exception}",
+      standardErrorFromLevel = LogEventLevel.Verbose
+    )
     .CreateLogger()
 
 let rootCommand = RootCommand(Name = "dev-ctx")
