@@ -11,6 +11,7 @@
     <Compile Include="Core\DevContextProvider.fs" />
     <Compile Include="ContextProviders\RepoContext.fs" />
     <Compile Include="ContextProviders\GitContext.fs" />
+    <Compile Include="ContextProviders\JiraContext.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

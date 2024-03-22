@@ -13,31 +13,37 @@ type BranchInfo =
   { FriendlyName: string
     FullName: string }
 
-type GitContext(repoCtx: RepoContext, logger: ILogger<GitContext>) =
-  member _.Branch() =
-    let workingDir = repoCtx.Dir()
+type IGitContext =
+  abstract member Branch: unit -> BranchInfo option
 
-    monad {
-      let! repoDir = Repository.Discover(workingDir) |> Option.ofObj
-      logger.LogDebug("Repository found at {repoDir}", repoDir)
-      use repo = new Repository(repoDir)
+type GitContext(repoCtx: IRepoContext, logger: ILogger<GitContext>) =
+  interface IGitContext with
+    member _.Branch() =
+      let workingDir = repoCtx.Dir()
 
-      let! currentBranch =
-        repo.Branches |> Seq.tryFind (_.IsCurrentRepositoryHead)
+      monad {
+        let! repoDir = Repository.Discover(workingDir) |> Option.ofObj
+        logger.LogDebug("Repository found at {repoDir}", repoDir)
+        use repo = new Repository(repoDir)
 
-      { FriendlyName = currentBranch.FriendlyName
-        FullName = currentBranch.CanonicalName }
-    }
+        let! currentBranch =
+          repo.Branches |> Seq.tryFind (_.IsCurrentRepositoryHead)
+
+        { FriendlyName = currentBranch.FriendlyName
+          FullName = currentBranch.CanonicalName }
+      }
 
 
 module GitCommand =
   open Utils
-  let build (builder: 'a -> 'a) (input: 'a) = builder input
 
-  let configureServices () =
+  let addGitContext (services: IServiceCollection) =
+    services.AddSingleton<IGitContext, GitContext>()
+
+  let private configureServices () =
     ServiceCollection()
-    |> DI.addSingleton<RepoContext>
-    |> DI.addSingleton<GitContext>
+    |> addGitContext
+    |> DI.addSingleton2 typeof<IRepoContext> typeof<RepoContext>
     |> DI.addLogger
     |> DI.buildServiceProvider
 
@@ -46,7 +52,7 @@ module GitCommand =
 
     cmd.SetHandler(fun () ->
       use sp = configureServices ()
-      let gitCtx = sp.GetRequiredService<GitContext>()
+      let gitCtx = sp.GetRequiredService<IGitContext>()
       writeToConsole (gitCtx.Branch()))
 
     get.Add(cmd)

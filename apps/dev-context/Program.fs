@@ -23,7 +23,9 @@ let getCommand = Command("get", "Get the current development context")
 rootCommand.AddCommand(getCommand)
 
 let commandProviders: IDevContextCommandProvider list =
-  [ RepoContextCommandProvider(); GitContextCommandProvider() ]
+  [ RepoContextCommandProvider()
+    GitContextCommandProvider()
+    JiraContextCommandProvider() ]
 
 commandProviders
 |> List.iter (fun provider -> provider.AddGetCommands getCommand)

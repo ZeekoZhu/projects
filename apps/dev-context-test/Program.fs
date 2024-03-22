@@ -1,4 +1,11 @@
+open FsUnit.TopLevelOperators
+open NUnit.Framework
+
 module Program =
 
-    [<EntryPoint>]
-    let main _ = 0
+  [<SetUpFixture>]
+  type InitMsgUtils() =
+    inherit FSharpCustomMessageFormatter()
+
+  [<EntryPoint>]
+  let main _ = 0

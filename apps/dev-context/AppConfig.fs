@@ -11,10 +11,7 @@ let templateConfigJson =
    "MinimumLevel": "Information"
   },
   "Jira": {
-    "username": "",
-    "password": "",
-    "url": "",
-    "pat": ""
+    "IssueKeyPrefix": "EE",
   }
 }
 """
