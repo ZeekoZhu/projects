@@ -10,7 +10,8 @@ let toString (x: 'a) = JsonSerializer.Serialize(x)
 
 let writeToConsole (x: 'a) = printfn $"%s{toString x}"
 
-
+let getLogger<'a> () =
+  Log.ForContext<'a>()
 module DI =
   let addLogger (services: IServiceCollection) =
     services.AddLogging(fun builder -> builder.AddSerilog() |> ignore)

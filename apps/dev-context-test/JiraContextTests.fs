@@ -24,7 +24,13 @@ let mockGitBranch (mocker: AutoMocker) (branch: string option) =
   mocker.GetMock<IGitContext>().Setup(fun x -> x.Branch()).Returns(result)
   |> ignore
 
-let createJiraCtx (mocker: AutoMocker) (config: JiraContextConfig) =
+let fakeJiraConfig =
+  { BaseUrl = "https://example.atlassian.net"
+    AuthInfo = BasicAuth("user", "pass")
+    IssueKeyPrefix = "DEV-" }
+
+[<Test>]
+let createJiraCtx (mocker: AutoMocker) (config: ParsedJiraConfig) =
   mocker.Use(config)
 
   let jiraCtx = mocker.CreateInstance<JiraContext>()
@@ -35,16 +41,10 @@ let createJiraCtx (mocker: AutoMocker) (config: JiraContextConfig) =
 let ``extract issue key from repo dir path`` () =
   let container = AutoMocker()
   mockLogger<JiraContext> container
-
-
-  let jiraCtx = container.CreateInstance<JiraContext>()
-
   mockRepoDir container "c:\\repos\\DEV-1234"
-
   mockGitBranch container None
 
-  let jiraCtx =
-    createJiraCtx container (JiraContextConfig(IssueKeyPrefix = "DEV-"))
+  let jiraCtx = createJiraCtx container fakeJiraConfig
 
   jiraCtx.IssueKey() |> shouldEqual (Some "DEV-1234")
 
@@ -56,8 +56,7 @@ let ``extract issue key from git branch name`` () =
   mockRepoDir container "c:\\repos\\"
   mockGitBranch container (Some "DEV-555-fix-something")
 
-  let config = JiraContextConfig(IssueKeyPrefix = "DEV-")
-  let jiraCtx = createJiraCtx container config
+  let jiraCtx = createJiraCtx container fakeJiraConfig
 
   jiraCtx.IssueKey() |> shouldEqual (Some "DEV-555")
 
@@ -68,8 +67,7 @@ let ``unable to extract issue key`` () =
   mockRepoDir container "c:\\repos\\"
   mockGitBranch container None
 
-  let config = JiraContextConfig(IssueKeyPrefix = "DEV-")
-  let jiraCtx = createJiraCtx container config
+  let jiraCtx = createJiraCtx container fakeJiraConfig
 
   jiraCtx.IssueKey() |> shouldEqual None
 
@@ -80,7 +78,10 @@ let ``prefix without '-'`` () =
   mockRepoDir container "c:\\repos\\DEV-111-fix-something"
   mockGitBranch container None
 
-  let config = JiraContextConfig(IssueKeyPrefix = "DEV")
-  let jiraCtx = createJiraCtx container config
+  let jiraCtx =
+    createJiraCtx
+      container
+      { fakeJiraConfig with
+          IssueKeyPrefix = "DEV" }
 
   jiraCtx.IssueKey() |> shouldEqual (Some "DEV-111")
