@@ -31,6 +31,8 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Projects.DevContext", "apps
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Projects.DevContext.Test", "apps\dev-context-test\Projects.DevContext.Test.fsproj", "{D376FE0C-AA6B-414C-9EAE-AAA38323259E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Projects.JiraPlatformApi", "libs\jira-platform-api\Projects.JiraPlatformApi.csproj", "{C880BCE1-A18B-4581-8120-5DA94CBEC541}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -88,6 +90,10 @@ Global
 		{D376FE0C-AA6B-414C-9EAE-AAA38323259E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D376FE0C-AA6B-414C-9EAE-AAA38323259E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D376FE0C-AA6B-414C-9EAE-AAA38323259E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C880BCE1-A18B-4581-8120-5DA94CBEC541}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C880BCE1-A18B-4581-8120-5DA94CBEC541}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C880BCE1-A18B-4581-8120-5DA94CBEC541}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C880BCE1-A18B-4581-8120-5DA94CBEC541}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C1664E5D-17FA-4B1D-ABCB-9F26242B73BC} = {7CC57615-BF02-46B8-A8A9-5F8B2BAD3171}
@@ -102,5 +108,6 @@ Global
 		{E3F689CB-E86C-40B2-AB7A-F8630A948104} = {8B0C3889-AF21-4C68-B2B6-3D6A03D9BDCA}
 		{6DC434E3-2DCC-4B93-8366-148C0D33F903} = {7CC57615-BF02-46B8-A8A9-5F8B2BAD3171}
 		{D376FE0C-AA6B-414C-9EAE-AAA38323259E} = {7CC57615-BF02-46B8-A8A9-5F8B2BAD3171}
+		{C880BCE1-A18B-4581-8120-5DA94CBEC541} = {8B0C3889-AF21-4C68-B2B6-3D6A03D9BDCA}
 	EndGlobalSection
 EndGlobal

@@ -29,7 +29,7 @@
         "cwd": "libs/jira-platform-api",
         "parallel": false,
         "commands": [
-          "yarn openapi-generator-cli generate -i ./jira-platform-swagger-v3.json -g csharp -o ./Generated -c ./openapi-generator-config.json",
+          "yarn openapi-generator-cli generate -i ./jira-platform.swagger.json -g csharp -o ./Generated -c ./openapi-generator-config.json",
           "cp ./Generated/src/Projects.JiraPlatformApi/* ./src/ -r",
           "rm ./src/Projects.JiraPlatformApi.csproj",
           "rm -rf ./Generated"

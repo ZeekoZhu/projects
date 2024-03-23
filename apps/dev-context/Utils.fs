@@ -2,16 +2,23 @@ module Projects.DevContext.Utils
 
 
 open System
+open System.Text.Encodings.Web
 open System.Text.Json
 open Microsoft.Extensions.DependencyInjection
 open Serilog
 
-let toString (x: 'a) = JsonSerializer.Serialize(x)
+let private jsonOptions =
+  JsonSerializerOptions(
+    JsonSerializerDefaults.Web,
+    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+  )
+
+let toString (x: 'a) = JsonSerializer.Serialize(x, jsonOptions)
 
 let writeToConsole (x: 'a) = printfn $"%s{toString x}"
 
-let getLogger<'a> () =
-  Log.ForContext<'a>()
+let getLogger<'a> () = Log.ForContext<'a>()
+
 module DI =
   let addLogger (services: IServiceCollection) =
     services.AddLogging(fun builder -> builder.AddSerilog() |> ignore)

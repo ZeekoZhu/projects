@@ -3,11 +3,17 @@ namespace Projects.DevContext.ContextProviders
 open System
 open System.CommandLine
 open System.Text.RegularExpressions
+open System.Threading.Tasks
+open FsToolkit.ErrorHandling
 open FSharpPlus.Data
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
 open Projects.DevContext
+open Projects.DevContext.ApiClient
 open Projects.DevContext.Core
+open Projects.JiraPlatformApi.Api
+open Projects.JiraPlatformApi.Client
+open Projects.JiraPlatformApi.Model
 
 type JiraContextConfig() =
   /// The issue key prefix to use when looking for issue keys, e.g. "PROJ-" or "PROJ"
@@ -17,27 +23,17 @@ type JiraContextConfig() =
   member val public Password: string = "" with get, set
   member val public PersonalAccessToken: string = "" with get, set
 
-type Username = string
-/// password or personal access token
-type Secret = string
-
-type JiraAuthInfo =
-  | BasicAuth of Username * Secret
-  | PAT of Secret
-
-type ParsedJiraConfig =
-  { IssueKeyPrefix: string
-    BaseUrl: string
-    AuthInfo: JiraAuthInfo }
 
 type IJiraContext =
   abstract IssueKey: unit -> string option
+  abstract Issue: unit -> IssueBean option Task
 
 type JiraContext
   (
     logger: ILogger<JiraContext>,
     repoCtx: IRepoContext,
     gitCtx: IGitContext,
+    jiraIssuesApi: IIssuesApi,
     config: ParsedJiraConfig
   ) =
   let getIssueKeyPattern () =
@@ -55,10 +51,25 @@ type JiraContext
     let matched = issueKeyPattern.Match(s)
     if matched.Success then Some matched.Value else None
 
+  let issueKey () =
+    tryGetIssueKeyFromString (gitCtx.Branch() |> Utils.toString)
+    |> Option.orElseWith (fun () -> tryGetIssueKeyFromString (repoCtx.Dir()))
+
+  let getIssueByKey (key: string) =
+    TaskResult.ofTask (jiraIssuesApi.GetIssueAsync(key))
+    |> TaskResult.teeError (fun (err: exn) ->
+      logger.LogError(err, "Failed to get issue by key '{Key}'", key))
+    |> Task.map Result.toOption
+
   interface IJiraContext with
-    member _.IssueKey() =
-      tryGetIssueKeyFromString (gitCtx.Branch() |> Utils.toString)
-      |> Option.orElseWith (fun () -> tryGetIssueKeyFromString (repoCtx.Dir()))
+    member _.IssueKey() = issueKey ()
+
+    member this.Issue() =
+      issueKey ()
+      |> Option.map getIssueByKey
+      |> Option.defaultWith (fun () -> Task.FromResult None)
+
+
 
 module JiraContextConfig =
   let private nonEmptyPrefix (config: JiraContextConfig) =
@@ -109,7 +120,21 @@ module JiraCommand =
 
         failwith "Failed to read jira context configuration")
 
-    services.AddSingleton<IJiraContext, JiraContext>().AddSingleton(config)
+    let apiConfig = Configuration()
+    apiConfig.BasePath <- config.BaseUrl
+
+    match config.AuthInfo with
+    | BasicAuth(username, password) ->
+      apiConfig.Username <- username
+      apiConfig.Password <- password
+    | PAT pat -> apiConfig.ApiKey.Add("Bearer", pat)
+
+    let apiClient = IssuesApi(apiConfig)
+
+    services
+      .AddSingleton<IIssuesApi>(apiClient)
+      .AddSingleton<IJiraContext, JiraContext>()
+      .AddSingleton(config)
 
 
   let private configureServices () =
@@ -133,6 +158,21 @@ module JiraCommand =
       writeToConsole (jiraCtx.IssueKey()))
 
     get.Add(issueKey)
+
+    let issueDetail = Command("jira:issue", "Get the Jira issue details")
+
+    issueDetail.SetHandler(fun () ->
+      let sp = configureServices ()
+      let jiraCtx = sp.GetService<IJiraContext>()
+
+      task {
+        let! issue = jiraCtx.Issue()
+        writeToConsole issue
+      }
+      :> Task)
+
+    get.Add(issueDetail)
+
 
 type JiraContextCommandProvider() =
   interface IDevContextCommandProvider with

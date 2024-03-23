@@ -6,6 +6,7 @@ open Moq.AutoMock
 open NUnit.Framework
 open FsUnitTyped
 open Projects.DevContext.ContextProviders
+open Projects.DevContext.ApiClient
 
 let mockLogger<'a> (mocker: AutoMocker) =
   let logger = (new NullLoggerFactory()).CreateLogger<'a>()
