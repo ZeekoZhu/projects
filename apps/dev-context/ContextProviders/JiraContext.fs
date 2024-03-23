@@ -9,7 +9,6 @@ open FSharpPlus.Data
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
 open Projects.DevContext
-open Projects.DevContext.ApiClient
 open Projects.DevContext.Core
 open Projects.JiraPlatformApi.Api
 open Projects.JiraPlatformApi.Client
@@ -27,6 +26,19 @@ type JiraContextConfig() =
 type IJiraContext =
   abstract IssueKey: unit -> string option
   abstract Issue: unit -> IssueBean option Task
+
+type Username = string
+/// password or personal access token
+type Secret = string
+
+type JiraAuthInfo =
+  | BasicAuth of Username * Secret
+  | PAT of Secret
+
+type ParsedJiraConfig =
+  { IssueKeyPrefix: string
+    BaseUrl: string
+    AuthInfo: JiraAuthInfo }
 
 type JiraContext
   (

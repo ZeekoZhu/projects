@@ -10,7 +10,6 @@
     <Compile Include="Utils.fs" />
     <Compile Include="AppConfig.fs" />
     <Compile Include="Core\DevContextProvider.fs" />
-    <Compile Include="ApiClient\Jira.fs" />
     <Compile Include="ContextProviders\RepoContext.fs" />
     <Compile Include="ContextProviders\GitContext.fs" />
     <Compile Include="ContextProviders\JiraContext.fs" />

@@ -36,12 +36,9 @@
     },
     "publish": {
       "executor": "@nx-dotnet/core:publish",
-      "dependsOn": ["build"],
       "options": {
         "configuration": "Debug",
-        "runtime": "linux-x64",
-        "extraParameters": "-P:PublishSingleFile=true",
-        "noBuild": true
+        "extraParameters": "-P:PublishSingleFile=true"
       },
       "configurations": {
         "production": {

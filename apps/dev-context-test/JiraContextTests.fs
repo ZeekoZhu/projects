@@ -6,7 +6,6 @@ open Moq.AutoMock
 open NUnit.Framework
 open FsUnitTyped
 open Projects.DevContext.ContextProviders
-open Projects.DevContext.ApiClient
 
 let mockLogger<'a> (mocker: AutoMocker) =
   let logger = (new NullLoggerFactory()).CreateLogger<'a>()
@@ -30,7 +29,6 @@ let fakeJiraConfig =
     AuthInfo = BasicAuth("user", "pass")
     IssueKeyPrefix = "DEV-" }
 
-[<Test>]
 let createJiraCtx (mocker: AutoMocker) (config: ParsedJiraConfig) =
   mocker.Use(config)
 
