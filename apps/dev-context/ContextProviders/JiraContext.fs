@@ -1,13 +1,16 @@
 namespace Projects.DevContext.ContextProviders
 
 open System
+open System.Collections.Generic
 open System.CommandLine
+open System.Dynamic
 open System.Text.RegularExpressions
 open System.Threading.Tasks
 open FsToolkit.ErrorHandling
 open FSharpPlus.Data
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
+open Newtonsoft.Json.Linq
 open Projects.DevContext
 open Projects.DevContext.Core
 open Projects.JiraPlatformApi.Api
@@ -22,10 +25,15 @@ type JiraContextConfig() =
   member val public Password: string = "" with get, set
   member val public PersonalAccessToken: string = "" with get, set
 
+type JiraIssueOutput =
+  { IssueKey: string
+    Summary: string
+    Description: string
+    Status: string }
 
 type IJiraContext =
   abstract IssueKey: unit -> string option
-  abstract Issue: unit -> IssueBean option Task
+  abstract Issue: unit -> JiraIssueOutput option Task
 
 type Username = string
 /// password or personal access token
@@ -39,6 +47,7 @@ type ParsedJiraConfig =
   { IssueKeyPrefix: string
     BaseUrl: string
     AuthInfo: JiraAuthInfo }
+
 
 type JiraContext
   (
@@ -73,6 +82,27 @@ type JiraContext
       logger.LogError(err, "Failed to get issue by key '{Key}'", key))
     |> Task.map Result.toOption
 
+  let tryGetString key (dict: IDictionary<string, obj>) =
+    match dict.TryGetValue(key) with
+    | true, value -> Some(value :?> string)
+    | _ -> None
+
+  let tryGetJObject key (dict: IDictionary<string, obj>) =
+    match dict.TryGetValue(key) with
+    | true, value -> Some(value :?> JObject)
+    | _ -> None
+
+  let toIssueOutput (issue: IssueBean) =
+    { IssueKey = issue.Key
+      Summary = issue.Fields |> tryGetString "summary" |> Option.defaultValue ""
+      Description =
+        issue.Fields |> tryGetString "description" |> Option.defaultValue ""
+      Status =
+        issue.Fields
+        |> tryGetJObject "status"
+        |> Option.map (_.Property("name").Value.ToString())
+        |> Option.defaultValue "" }
+
   interface IJiraContext with
     member _.IssueKey() = issueKey ()
 
@@ -80,6 +110,7 @@ type JiraContext
       issueKey ()
       |> Option.map getIssueByKey
       |> Option.defaultWith (fun () -> Task.FromResult None)
+      |> TaskOption.map toIssueOutput
 
 
 
