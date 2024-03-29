@@ -33,6 +33,17 @@
     },
     "lint": {
       "executor": "@nx-dotnet/core:format"
+    },
+    "publish": {
+      "executor": "@nx-dotnet/core:publish",
+      "options": {
+        "configuration": "Debug"
+      },
+      "configurations": {
+        "production": {
+          "configuration": "Release"
+        }
+      }
     }
   },
   "tags": []
