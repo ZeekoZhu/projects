@@ -69,29 +69,31 @@ let renameCommandHandler (config: RenameConfig) =
       let pdfFiles =
         config.InvoiceInbox.GetFiles("*.pdf", SearchOption.AllDirectories)
 
-      let task =
-        ctx.AddTask(
-          $"Renaming {pdfFiles.Length} files",
-          maxValue = pdfFiles.Length
-        )
+      if pdfFiles.Length = 0 then
+        AnsiConsole.MarkupLine("[red]No pdf files found[/]")
+      else
+        let task =
+          ctx.AddTask(
+            $"Renaming {pdfFiles.Length} files",
+            maxValue = pdfFiles.Length
+          )
 
-      let handleRenameCompleted () res =
-        task.Increment(1)
+        let handleRenameCompleted () res =
+          task.Increment(1)
 
-        match res with
-        | Ok(file: FileInfo, _) -> File.Delete(file.FullName)
-        | Error(e: RenameInvoiceFailedReason) ->
-          AnsiConsole.MarkupLine($"[red]Failed to rename {e.File.Name}[/]")
-          AnsiConsole.WriteException(e.Reason)
+          match res with
+          | Ok(file: FileInfo, _) -> File.Delete(file.FullName)
+          | Error(e: RenameInvoiceFailedReason) ->
+            AnsiConsole.MarkupLine($"[red]Failed to rename {e.File.Name}[/]")
+            AnsiConsole.WriteException(e.Reason)
 
-      let asyncTasks =
-        pdfFiles
-        |> Seq.map (
-          renameFileAsync config >> Async.map (handleRenameCompleted ())
-        )
+        let asyncTasks =
+          pdfFiles
+          |> Seq.map (
+            renameFileAsync config >> Async.map (handleRenameCompleted ())
+          )
 
-      Async.Parallel(asyncTasks, 5) |> Async.RunSynchronously)
-  |> ignore
+        Async.Parallel(asyncTasks, 5) |> Async.RunSynchronously |> ignore)
 
 let tryReadString (model: TomlTable) key =
   let success, value = model.TryGetValue key
