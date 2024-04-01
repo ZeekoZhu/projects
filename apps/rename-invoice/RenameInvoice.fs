@@ -3,24 +3,14 @@ module RenameInvoice.RenameInvoice
 open System
 open System.IO
 open System.Text
-open System.Text.Encodings.Web
-open System.Text.Json
 open AlibabaCloud.SDK.Ocr_api20210707.Models
 open CliWrap
 open FSharp.Data
-open FSharpPlus
 open FsToolkit.ErrorHandling
+open RenameInvoice.Json
+open RenameInvoice.Types
 open Spectre.Console
 
-type InvoiceDetailItem = { Name: string }
-
-type InvoiceInfo =
-  { Price: float
-    Date: DateOnly
-    Seller: string
-    InvoiceNumber: string
-    Items: InvoiceDetailItem list
-    TextContent: string }
 
 type RenameInvoiceFailedReason =
   { File: FileInfo
@@ -109,18 +99,10 @@ let extractInvoiceInfo (file: FileInfo) =
         Reason = exn }
 
 
-let jsonOptions =
-  JsonSerializerOptions(
-    JsonSerializerDefaults.Web,
-    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-    WriteIndented = true
-  )
-
 let createSidecarFile (file: string) (invoiceInfo: InvoiceInfo) =
   // create a json file alongside the invoice file, named as the invoice file with .json extension
   let jsonFile = Path.ChangeExtension(file, ".json")
-  let json = JsonSerializer.Serialize(invoiceInfo, jsonOptions)
-  File.WriteAllText(jsonFile, json)
+  writeInvoiceInfo (FileInfo(jsonFile)) invoiceInfo
 
 let renameInvoice (input: RenameInvoiceInput) outputDir =
   let info = input.Info

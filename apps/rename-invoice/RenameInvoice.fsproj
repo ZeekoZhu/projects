@@ -7,7 +7,10 @@
 
   <ItemGroup>
     <Content Include="example.json" />
+    <Compile Include="Json.fs" />
+    <Compile Include="Types.fs" />
     <Compile Include="RenameInvoice.fs" />
+    <Compile Include="Stats.fs" />
     <Compile Include="InvoiceClassifier.fs" />
     <Compile Include="RenameCommand.fs" />
     <Compile Include="Program.fs" />
