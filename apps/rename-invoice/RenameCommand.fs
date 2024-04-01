@@ -82,6 +82,7 @@ let renameCommandHandler (config: RenameConfig) =
         | Ok(file: FileInfo, _) -> File.Delete(file.FullName)
         | Error(e: RenameInvoiceFailedReason) ->
           AnsiConsole.MarkupLine($"[red]Failed to rename {e.File.Name}[/]")
+          AnsiConsole.WriteException(e.Reason)
 
       let asyncTasks =
         pdfFiles

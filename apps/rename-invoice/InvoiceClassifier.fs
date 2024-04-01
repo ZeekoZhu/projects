@@ -5,10 +5,9 @@ open RenameInvoice.RenameInvoice
 type InvoiceCategoryRule = { Name: string; Keywords: string list }
 
 let getCategory (categories: InvoiceCategoryRule list) (invoice: InvoiceInfo) =
-  let itemNames = invoice.Items |> Seq.map _.Name |> String.concat " "
-  let string = $"{invoice.Seller} {itemNames}"
+  let string = invoice.TextContent
 
   categories
   |> Seq.tryFind (fun category ->
-    category.Keywords |> List.exists (fun keyword -> string.Contains(keyword)))
+    category.Keywords |> List.exists string.Contains)
   |> Option.map _.Name

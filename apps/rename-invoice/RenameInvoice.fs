@@ -2,10 +2,14 @@ module RenameInvoice.RenameInvoice
 
 open System
 open System.IO
+open System.Text
 open System.Text.Encodings.Web
 open System.Text.Json
 open AlibabaCloud.SDK.Ocr_api20210707.Models
+open CliWrap
 open FSharp.Data
+open FSharpPlus
+open FsToolkit.ErrorHandling
 open Spectre.Console
 
 type InvoiceDetailItem = { Name: string }
@@ -15,7 +19,8 @@ type InvoiceInfo =
     Date: DateOnly
     Seller: string
     InvoiceNumber: string
-    Items: InvoiceDetailItem list }
+    Items: InvoiceDetailItem list
+    TextContent: string }
 
 type RenameInvoiceFailedReason =
   { File: FileInfo
@@ -50,6 +55,31 @@ let client =
     (Environment.GetEnvironmentVariable "ALIBABA_CLOUD_ACCESS_KEY_ID")
     (Environment.GetEnvironmentVariable "ALIBABA_CLOUD_ACCESS_KEY_SECRET")
 
+let convertToText (file: FileInfo) =
+  let sb = StringBuilder()
+
+  Console.Error.WriteLine $"converting pdf to text: {file.FullName}"
+
+  let cmd =
+    Cli
+      .Wrap("pdftotext")
+      .WithArguments([ "-layout"; file.FullName; "-" ])
+      .WithStandardOutputPipe(PipeTarget.ToStringBuilder(sb))
+      .WithStandardErrorPipe(
+        PipeTarget.ToDelegate(fun s ->
+          Console.Error.WriteLine $"pdftotext 2> {s}")
+      )
+
+  let result =
+    cmd.ExecuteAsync().Task
+    |> AsyncResult.ofTask
+    |> AsyncResult.map (fun _ -> sb.ToString())
+    |> AsyncResult.teeError AnsiConsole.WriteException
+    |> Async.RunSynchronously
+    |> Option.ofResult
+    |> Option.defaultWith sb.ToString
+
+  result
 
 let extractInvoiceInfo (file: FileInfo) =
   try
@@ -65,6 +95,7 @@ let extractInvoiceInfo (file: FileInfo) =
         Date = DateOnly.FromDateTime data.Data.InvoiceDate
         Seller = data.Data.SellerName
         InvoiceNumber = data.Data.InvoiceNumber.JsonValue.AsString()
+        TextContent = convertToText file
         Items =
           data.Data.InvoiceDetails
           |> Seq.map (fun x -> { Name = x.ItemName })
@@ -103,6 +134,7 @@ let renameInvoice (input: RenameInvoiceInput) outputDir =
     Directory.CreateDirectory outputDir |> ignore
 
   let outputFilePath = Path.Join(outputDir, fileName)
+
   if Path.Exists outputFilePath then
     AnsiConsole.WriteLine $"[red]File already exists: {outputFilePath}[/]"
   else
