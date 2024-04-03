@@ -9,6 +9,7 @@
     <Compile Include="Utils.fs" />
     <Compile Include="AppConfig.fs" />
     <Compile Include="Core\DevContextProvider.fs" />
+    <Compile Include="Core\Model.fs" />
     <Compile Include="ContextProviders\RepoContext.fs" />
     <Compile Include="ContextProviders\GitContext.fs" />
     <Compile Include="ContextProviders\JiraContext.fs" />
@@ -21,6 +22,7 @@
     <PackageReference Include="LibGit2Sharp" Version="0.30.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="NGitLab" Version="6.48.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />

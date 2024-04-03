@@ -3,16 +3,15 @@ namespace Projects.DevContext.ContextProviders
 open System
 open System.Collections.Generic
 open System.CommandLine
-open System.Dynamic
 open System.Text.RegularExpressions
 open System.Threading.Tasks
 open FsToolkit.ErrorHandling
-open FSharpPlus.Data
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.Extensions.Logging
 open Newtonsoft.Json.Linq
 open Projects.DevContext
 open Projects.DevContext.Core
+open Projects.DevContext.Core.Model
 open Projects.JiraPlatformApi.Api
 open Projects.JiraPlatformApi.Client
 open Projects.JiraPlatformApi.Model
@@ -35,9 +34,6 @@ type IJiraContext =
   abstract IssueKey: unit -> string option
   abstract Issue: unit -> JiraIssueOutput option Task
 
-type Username = string
-/// password or personal access token
-type Secret = string
 
 type JiraAuthInfo =
   | BasicAuth of Username * Secret
@@ -117,9 +113,9 @@ type JiraContext
 module JiraContextConfig =
   let private nonEmptyPrefix (config: JiraContextConfig) =
     if String.IsNullOrWhiteSpace config.IssueKeyPrefix then
-      Failure [ "Jira issue key prefix must not be empty" ]
+      Validation.error [ "Jira issue key prefix must not be empty" ]
     else
-      Success config
+      Validation.ok config
 
   let private validAuthInfo (config: JiraContextConfig) =
     match config.Username, config.Password, config.PersonalAccessToken with
@@ -127,17 +123,18 @@ module JiraContextConfig =
       not <| String.IsNullOrWhiteSpace username
       && not <| String.IsNullOrWhiteSpace password
       ->
-      Success(BasicAuth(username, password))
-    | _, _, pat when not <| String.IsNullOrWhiteSpace pat -> Success(PAT pat)
+      Validation.ok (BasicAuth(username, password))
+    | _, _, pat when not <| String.IsNullOrWhiteSpace pat ->
+      Validation.ok (PAT pat)
     | _ ->
-      Failure
+      Validation.error
         [ "Jira authentication information is invalid, please provide either (Username, Password) or (PersonalAccessToken)" ]
 
   let private nonEmptyBaseUrl (config: JiraContextConfig) =
     if String.IsNullOrWhiteSpace config.BaseUrl then
-      Failure [ "Jira base url must not be empty" ]
+      Validation.error [ "Jira base url must not be empty" ]
     else
-      Success config
+      Validation.ok config
 
   let parseConfig (config: JiraContextConfig) =
     nonEmptyPrefix config
@@ -157,7 +154,7 @@ module JiraCommand =
   let addJiraContext (services: IServiceCollection) =
     let config =
       JiraContextConfig.readConfig ()
-      |> Validation.defaultWith (fun err ->
+      |> Result.defaultWith (fun err ->
         getLogger()
           .Error("Failed to read jira context configuration: {Errors}", err)
 
