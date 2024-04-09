@@ -25,7 +25,9 @@ let configDir =
 let ensureConfigDir () =
   if not (Directory.Exists(configDir)) then
     Directory.CreateDirectory(configDir) |> ignore
+
   let appsettingsFile = Path.Join(configDir, "appsettings.json")
+
   if not (File.Exists(appsettingsFile)) then
     File.WriteAllText(appsettingsFile, templateConfigJson)
 
@@ -45,5 +47,5 @@ let private appConfigLazy = Lazy<IConfigurationRoot>(setupConfiguration)
 let configuration () = appConfigLazy.Value
 
 
-let section<'a> (name: string) =
-  configuration().GetSection(name).Get<'a>()
+let section<'a when 'a: null> (name: string) =
+  configuration().GetSection(name).Get<'a>() |> Option.ofObj

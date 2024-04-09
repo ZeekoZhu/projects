@@ -13,6 +13,7 @@
     <Compile Include="ContextProviders\RepoContext.fs" />
     <Compile Include="ContextProviders\GitContext.fs" />
     <Compile Include="ContextProviders\JiraContext.fs" />
+    <Compile Include="ContextProviders\GitLabContext.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -23,6 +24,7 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="NGitLab" Version="6.48.0" />
+    <PackageReference Include="RestSharp" Version="110.2.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
     <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
@@ -32,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\libs\git-lab-api\Projects.GitLabApi.csproj" />
     <ProjectReference Include="..\..\libs\jira-platform-api\Projects.JiraPlatformApi.csproj" />
   </ItemGroup>
 

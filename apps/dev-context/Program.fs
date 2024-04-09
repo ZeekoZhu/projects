@@ -25,7 +25,8 @@ rootCommand.AddCommand(getCommand)
 let commandProviders: IDevContextCommandProvider list =
   [ RepoContextCommandProvider()
     GitContextCommandProvider()
-    JiraContextCommandProvider() ]
+    JiraContextCommandProvider()
+    GitLabContextCommandProvider() ]
 
 commandProviders
 |> List.iter (fun provider -> provider.AddGetCommands getCommand)

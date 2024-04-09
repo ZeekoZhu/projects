@@ -1,0 +1,58 @@
+﻿[
+  {
+    "Key": "simple_string",
+    "Value": "value1"
+  },
+  {
+    "Key": "simple_array[0]",
+    "Value": "value1"
+  },
+  {
+    "Key": "simple_array[1]",
+    "Value": "value2"
+  },
+  {
+    "Key": "simple_date_time",
+    "Value": "2021-01-01T00:00:00.000Z"
+  },
+  {
+    "Key": "simple_bool",
+    "Value": "true"
+  },
+  {
+    "Key": "simple_int",
+    "Value": "1"
+  },
+  {
+    "Key": "simple_long",
+    "Value": "1"
+  },
+  {
+    "Key": "simple_double",
+    "Value": "1"
+  },
+  {
+    "Key": "simple_hash[key1]",
+    "Value": "value1"
+  },
+  {
+    "Key": "simple_hash[key2]",
+    "Value": "value2"
+  },
+  {
+    "Key": "hash_array[0][key1]",
+    "Value": "value1"
+  },
+  {
+    "Key": "hash_array[0][key2]",
+    "Value": "value2"
+  },
+  {
+    "Key": "hash_array[1][key1]",
+    "Value": "value1"
+  },
+  {
+    "Key": "hash_array[1][key2]",
+    "Value": "value2"
+  }
+]

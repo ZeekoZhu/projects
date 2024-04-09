@@ -4,6 +4,7 @@ module Projects.DevContext.Utils
 open System
 open System.Text.Encodings.Web
 open System.Text.Json
+open FsToolkit.ErrorHandling
 open Microsoft.Extensions.DependencyInjection
 open Serilog
 
@@ -13,7 +14,8 @@ let private jsonOptions =
     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
   )
 
-let toString (x: 'a) = JsonSerializer.Serialize(x, jsonOptions)
+let toString (x: 'a) =
+  JsonSerializer.Serialize(x, jsonOptions)
 
 let writeToConsole (x: 'a) = printfn $"%s{toString x}"
 
@@ -31,3 +33,19 @@ module DI =
 
   let buildServiceProvider (services: IServiceCollection) =
     services.BuildServiceProvider()
+
+module Validations =
+  let notNone selector message target =
+    let value = selector target
+
+    match value with
+    | Some v -> Validation.ok v
+    | _ -> Validation.error message
+
+  let nonEmptyString selector message target =
+    let value = selector target
+
+    if String.IsNullOrWhiteSpace value then
+      Validation.error (message value)
+    else
+      Validation.ok target

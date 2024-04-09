@@ -15,6 +15,7 @@ type BranchInfo =
 
 type IGitContext =
   abstract member Branch: unit -> BranchInfo option
+  abstract member RemoteRepositoryUrl: unit -> string option
 
 type GitContext(repoCtx: IRepoContext, logger: ILogger<GitContext>) =
   interface IGitContext with
@@ -31,6 +32,14 @@ type GitContext(repoCtx: IRepoContext, logger: ILogger<GitContext>) =
 
         { FriendlyName = currentBranch.FriendlyName
           FullName = currentBranch.CanonicalName }
+      }
+
+    member this.RemoteRepositoryUrl() =
+      monad {
+        let! repoDir = Repository.Discover(repoCtx.Dir()) |> Option.ofObj
+        logger.LogDebug("Repository found at {repoDir}", repoDir)
+        use repo = new Repository(repoDir)
+        return! repo.Network.Remotes |> Seq.tryHead |> Option.map (_.Url)
       }
 
 
