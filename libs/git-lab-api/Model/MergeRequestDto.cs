@@ -188,7 +188,7 @@ public class MergeRequestDto
     /// <summary>
     /// Indicates whether the source branch should be removed after merging.
     /// </summary>
-    public required bool ShouldRemoveSourceBranch { get; set; }
+    public bool? ShouldRemoveSourceBranch { get; set; }
 
     /// <summary>
     /// Indicates whether the source branch should be forcibly removed after merging.
@@ -198,12 +198,12 @@ public class MergeRequestDto
     /// <summary>
     /// Indicates whether collaboration is allowed.
     /// </summary>
-    public required bool AllowCollaboration { get; set; }
+    public bool? AllowCollaboration { get; set; }
 
     /// <summary>
     /// Indicates whether maintainers are allowed to push.
     /// </summary>
-    public required bool AllowMaintainerToPush { get; set; }
+    public bool? AllowMaintainerToPush { get; set; }
 
     /// <summary>
     /// The web URL of the merge request.

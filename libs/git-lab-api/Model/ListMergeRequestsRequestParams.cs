@@ -170,8 +170,8 @@ public class ListMergeRequestsRequestParams : IPaginationParams
   /// </summary>
   public string? Wip { get; set; }
 
-  public int Page { get; set; }
-  public int PerPage { get; set; }
+  public int? Page { get; set; }
+  public int? PerPage { get; set; }
 
   public class NotParams
   {

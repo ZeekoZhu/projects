@@ -1,6 +1,7 @@
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.Extensions.Logging;
 using Projects.GitLabApi.Abstraction;
 using Projects.GitLabApi.Model;
 using RestSharp;
@@ -8,12 +9,14 @@ using RestSharp.Serializers.Json;
 
 namespace Projects.GitLabApi.Concrete;
 
-public class GitLabApi(IRestClient client) : IGitLabApi
+public class GitLabApi(IRestClient client, LogInterceptor interceptor)
+  : IGitLabApi
 {
-  public IProjectEndpoint Project { get; } = new ProjectEndpoint(client);
+  public IProjectEndpoint Project { get; } =
+    new ProjectEndpoint(client, interceptor);
 
   public IMergeRequestEndpoint MergeRequest { get; } =
-    new MergeRequestEndpoint(client);
+    new MergeRequestEndpoint(client, interceptor);
 
   public static readonly JsonSerializerOptions JSONSerializerOptions =
     new(JsonSerializerDefaults.Web)
@@ -23,38 +26,48 @@ public class GitLabApi(IRestClient client) : IGitLabApi
       UnmappedMemberHandling = JsonUnmappedMemberHandling.Skip
     };
 
-  public static GitLabApi Create(string baseUrl, string token)
+  public static GitLabApi Create(
+    string baseUrl,
+    string token,
+    ILogger<IGitLabApi> logger)
   {
     var client = new RestClient(
         new RestClientOptions(baseUrl),
         configureSerialization: s => s.UseSystemTextJson(JSONSerializerOptions))
       .AddDefaultHeader("Authorization", $"Bearer {token}");
 
-    return new GitLabApi(client);
+    return new GitLabApi(client, new LogInterceptor(logger));
   }
 }
 
-public class MergeRequestEndpoint(IRestClient client) : IMergeRequestEndpoint
+public class MergeRequestEndpoint(
+  IRestClient client,
+  LogInterceptor interceptor) : IMergeRequestEndpoint
 {
-  public Task<PaginationResult<MergeRequestDto>?> ListProjectMergeRequestsAsync(
-    string projectId,
-    ListMergeRequestsRequestParams requestParams,
-    CancellationToken cancellationToken = default)
+  public async Task<PaginationResult<MergeRequestDto>?>
+    ListProjectMergeRequestsAsync(
+      string projectId,
+      ListMergeRequestsRequestParams requestParams,
+      CancellationToken cancellationToken = default)
   {
     var req = new RestRequest("/projects/{id}/merge_requests")
-      .AddUrlSegment(
-        nameof(projectId).ToAttributeName(),
-        projectId);
+      .AddUrlSegment("id", projectId)
+      .AddAttribute(requestParams)
+      .LogRequest(interceptor);
+    var resp =
+      await client.ExecuteGetAsync<MergeRequestDto[]>(req, cancellationToken);
 
-    req.AddAttribute(requestParams);
-
-    return client.GetAsync<PaginationResult<MergeRequestDto>>(
-      req,
-      cancellationToken: cancellationToken);
+    resp.ThrowIfError();
+    return new PaginationResult<MergeRequestDto>
+    {
+      Items = resp.Data ?? Array.Empty<MergeRequestDto>(),
+      Pagination = resp.ToPaginationInfo()
+    };
   }
 }
 
-public class ProjectEndpoint(IRestClient client) : IProjectEndpoint
+public class ProjectEndpoint(IRestClient client, LogInterceptor interceptor)
+  : IProjectEndpoint
 {
   public Task<ProjectDto?> GetProjectAsync(
     string id,
@@ -65,7 +78,8 @@ public class ProjectEndpoint(IRestClient client) : IProjectEndpoint
       .AddUrlSegment(
         nameof(id).ToAttributeName(),
         id)
-      .AddAttribute(requestParams);
+      .AddAttribute(requestParams)
+      .LogRequest(interceptor);
 
     return client.GetAsync<ProjectDto>(
       req,
@@ -99,5 +113,47 @@ internal static class GitLabApiExtensions
     }
 
     return req;
+  }
+
+  public static PaginationInfo ToPaginationInfo(this RestResponse response)
+  {
+    var result = new PaginationInfo
+    {
+      NextPage = 0,
+      PrevPage = 0,
+      Page = 0,
+      PerPage = 0,
+      Total = null,
+      TotalPages = null
+    };
+
+    if (response.Headers is not null)
+    {
+      var headers = response.Headers.ToLookup(
+        it => it.Name!,
+        it => it.Value as string);
+
+      int? TryReadInt(ILookup<string, string?> respHeaders, string key)
+      {
+        if (!respHeaders.Contains(key)) return null;
+
+        var value = respHeaders[key]
+          .FirstOrDefault();
+
+        if (value != null && int.TryParse(value, out var parsed))
+          return parsed;
+
+        return null;
+      }
+
+      result.NextPage = TryReadInt(headers, "x-next-page") ?? 0;
+      result.Page = TryReadInt(headers, "x-page") ?? 0;
+      result.PerPage = TryReadInt(headers, "x-per-page") ?? 0;
+      result.PrevPage = TryReadInt(headers, "x-prev-page") ?? 0;
+      result.Total = TryReadInt(headers, "x-total");
+      result.TotalPages = TryReadInt(headers, "x-total-pages");
+    }
+
+    return result;
   }
 }

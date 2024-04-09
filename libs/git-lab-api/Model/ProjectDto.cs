@@ -63,7 +63,7 @@ public class ProjectDto
   /// <summary>
   /// The owner of the project.
   /// </summary>
-  public required OwnerDto Owner { get; set; }
+  public OwnerDto? Owner { get; set; }
 
   /// <summary>
   /// The name of the project.
@@ -282,12 +282,12 @@ public class ProjectDto
   /// <summary>
   /// The list of groups with which the project is shared.
   /// </summary>
-  public required List<SharedWithGroupDto> SharedWithGroups { get; set; }
+  public List<SharedWithGroupDto>? SharedWithGroups { get; set; }
 
   /// <summary>
   /// The storage location for the project's repository.
   /// </summary>
-  public required string RepositoryStorage { get; set; }
+  public string? RepositoryStorage { get; set; }
 
   /// <summary>
   /// Indicates whether merge requests are only allowed if the pipeline succeeds.
@@ -447,7 +447,7 @@ public class ProjectDto
   /// <summary>
   /// The statistics for the project.
   /// </summary>
-  public required StatisticsDto Statistics { get; set; }
+  public StatisticsDto? Statistics { get; set; }
 
   /// <summary>
   /// The image prefix for the project's container registry.
