@@ -20,17 +20,6 @@
         }
       }
     },
-    "serve": {
-      "executor": "@nx-dotnet/core:serve",
-      "options": {
-        "configuration": "Debug"
-      },
-      "configurations": {
-        "production": {
-          "configuration": "Release"
-        }
-      }
-    },
     "lint": {
       "executor": "@nx-dotnet/core:format"
     },

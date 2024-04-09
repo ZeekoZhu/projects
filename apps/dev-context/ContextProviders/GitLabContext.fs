@@ -28,7 +28,9 @@ type GitLabMROutput =
     Title: string
     Description: string
     State: string
-    WebURL: string }
+    WebURL: string
+    SourceBranch: string
+    TargetBranch: string }
 
 type GitLabProjectOutput =
   { ID: int64
@@ -69,6 +71,7 @@ type GitLabContext
     |> TaskOption.FromResult
     |> TaskOption.bind (fun path ->
       logger.LogDebug("Fetching project information for {Path}", path)
+
       gitlabApi.Project.GetProjectAsync(path, GetProjectRequestParams())
       |> Task.map Option.ofObj)
     |> TaskOption.map (fun project ->
@@ -84,7 +87,9 @@ type GitLabContext
         projectId,
         ListMergeRequestsRequestParams(SourceBranch = branch)
       )
-      |> Task.map (fun it -> it.Items |> Array.tryHead)
+      |> Task.map (fun it ->
+        logger.LogDebug("Merge requests: {@Response}", it)
+        it.Items |> (Option.ofObj >> (Option.bind Array.tryHead)))
 
     taskOption {
       let! branch = git.Branch() |> Task.FromResult
@@ -103,7 +108,9 @@ type GitLabContext
             Title = mr.Title
             Description = mr.Description
             State = mr.State
-            WebURL = mr.WebUrl }
+            WebURL = mr.WebUrl
+            SourceBranch = mr.SourceBranch
+            TargetBranch = mr.TargetBranch }
       }
 
     member this.Project() = fetchProject ()
@@ -147,10 +154,10 @@ module GitLabCommand =
 
         failwith "Failed to read GitLab config")
 
-    let gitlabApi = GitLabApi.Create(config.Host, config.Token)
-
     services
-      .AddSingleton<IGitLabApi>(gitlabApi)
+      .AddSingleton<IGitLabApi>(fun sp ->
+        let logger = sp.GetService<ILogger<IGitLabApi>>()
+        GitLabApi.Create(config.Host, config.Token, logger) :> IGitLabApi)
       .AddSingleton<IGitLabContext, GitLabContext>()
       .AddSingleton(config)
 
@@ -190,6 +197,8 @@ module GitLabCommand =
         writeToConsole mr
       }
       :> Task)
+
+    get.Add(mergeRequest)
 
 
 type GitLabContextCommandProvider() =
