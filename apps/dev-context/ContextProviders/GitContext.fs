@@ -1,11 +1,13 @@
 namespace Projects.DevContext.ContextProviders
 
+open System
 open System.CommandLine
 open LibGit2Sharp
 open Microsoft.Extensions.DependencyInjection
 open Projects.DevContext
 open Projects.DevContext.Core
 open FSharpPlus
+open FsToolkit.ErrorHandling
 open Microsoft.Extensions.Logging
 
 
@@ -13,22 +15,70 @@ type BranchInfo =
   { FriendlyName: string
     FullName: string }
 
+type CommitInfo =
+  { SHA: string
+    Message: string
+    CommitTime: DateTimeOffset }
+
 type IGitContext =
   abstract member Branch: unit -> BranchInfo option
   abstract member RemoteRepositoryUrl: unit -> string option
+  abstract member Commits: unit -> CommitInfo list
 
 type GitContext(repoCtx: IRepoContext, logger: ILogger<GitContext>) =
+  let currentGitRepo () =
+    Repository.Discover(repoCtx.Dir())
+    |> Option.ofObj
+    |> Option.teeSome (fun dir -> logger.LogDebug("Repository found at {dir}", dir))
+    |> Option.teeNone (fun () -> logger.LogWarning("No git repository found"))
+
+  let tryFindCurrentBranch (repo: Repository) =
+    repo.Branches
+    |> Seq.tryFind (_.IsCurrentRepositoryHead)
+    |> Option.teeSome (fun b -> logger.LogDebug("Current branch: {branch}", b.CanonicalName))
+    |> Option.teeNone (fun () -> logger.LogWarning("No current branch found"))
+
+  let defaultBranch (repo: Repository) =
+    repo.Branches
+    |> Seq.tryFind (fun b ->
+      b.CanonicalName.Equals("refs/heads/main", StringComparison.InvariantCultureIgnoreCase)
+      || b.CanonicalName.Equals("refs/heads/master", StringComparison.InvariantCultureIgnoreCase))
+    // todo: make the default branch configurable
+    |> Option.defaultWith (fun () -> failwith "Unable to find default branch")
+
+  let commitsMissingInDefault (repo: Repository) (branch: Branch) =
+    let defaultBranch = defaultBranch repo
+
+    if defaultBranch = branch then
+      failwith "Only feature branch workflow is supported at the moment."
+    else
+      let mergeTargetRef = defaultBranch.Tip
+      let mergeBase = repo.ObjectDatabase.FindMergeBase(branch.Tip, mergeTargetRef)
+      branch.Commits |> Seq.takeWhile (fun c -> c <> mergeBase) |> Seq.truncate 50
+
+  let currentBranchCommits () =
+    monad {
+      let! repoDir = currentGitRepo ()
+      use repo = new Repository(repoDir)
+      let! currentBranch = tryFindCurrentBranch repo
+
+      commitsMissingInDefault repo currentBranch
+      |> Seq.map (fun c ->
+        { SHA = c.Sha[0..7]
+          Message = c.Message
+          CommitTime = c.Committer.When })
+      |> Seq.toList
+    }
+    |> Option.defaultValue []
+
+
   interface IGitContext with
     member _.Branch() =
-      let workingDir = repoCtx.Dir()
-
       monad {
-        let! repoDir = Repository.Discover(workingDir) |> Option.ofObj
-        logger.LogDebug("Repository found at {repoDir}", repoDir)
+        let! repoDir = currentGitRepo ()
         use repo = new Repository(repoDir)
 
-        let! currentBranch =
-          repo.Branches |> Seq.tryFind (_.IsCurrentRepositoryHead)
+        let! currentBranch = repo.Branches |> Seq.tryFind (_.IsCurrentRepositoryHead)
 
         { FriendlyName = currentBranch.FriendlyName
           FullName = currentBranch.CanonicalName }
@@ -41,6 +91,8 @@ type GitContext(repoCtx: IRepoContext, logger: ILogger<GitContext>) =
         use repo = new Repository(repoDir)
         return! repo.Network.Remotes |> Seq.tryHead |> Option.map (_.Url)
       }
+
+    member this.Commits() = currentBranchCommits ()
 
 
 module GitCommand =
@@ -65,7 +117,17 @@ module GitCommand =
       writeToConsole (gitCtx.Branch()))
 
     get.Add(cmd)
-    ()
+
+    let listCommitsCmd =
+      Command("git:commits", "List commits to be merged on the current branch")
+
+    listCommitsCmd.SetHandler(fun () ->
+      use sp = configureServices ()
+      let gitCtx = sp.GetRequiredService<IGitContext>()
+      writeToConsole (gitCtx.Commits()))
+
+    get.Add(listCommitsCmd)
+
 
 type GitContextCommandProvider() =
   interface IDevContextCommandProvider with
