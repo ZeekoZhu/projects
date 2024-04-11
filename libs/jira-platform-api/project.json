@@ -1,0 +1,41 @@
+{
+  "name": "jira-platform-api",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/jira-platform-api",
+  "targets": {
+    "build": {
+      "executor": "@nx-dotnet/core:build",
+      "outputs": [
+        "{workspaceRoot}/dist/libs/jira-platform-api",
+        "{workspaceRoot}/dist/intermediates/libs/jira-platform-api"
+      ],
+      "options": {
+        "configuration": "Debug",
+        "noDependencies": true
+      },
+      "configurations": {
+        "production": {
+          "configuration": "Release"
+        }
+      }
+    },
+    "lint": {
+      "executor": "@nx-dotnet/core:format"
+    },
+    "codegen": {
+      "executor": "nx:run-commands",
+      "options": {
+        "cwd": "libs/jira-platform-api",
+        "parallel": false,
+        "commands": [
+          "yarn openapi-generator-cli generate -i ./jira-platform.swagger.json -g csharp -o ./Generated -c ./openapi-generator-config.json",
+          "cp ./Generated/src/Projects.JiraPlatformApi/* ./src/ -r",
+          "rm ./src/Projects.JiraPlatformApi.csproj",
+          "rm -rf ./Generated"
+        ]
+      }
+    }
+  },
+  "tags": []
+}

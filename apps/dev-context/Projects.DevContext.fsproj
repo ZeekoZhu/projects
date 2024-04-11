@@ -1,0 +1,42 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Utils.fs" />
+    <Compile Include="AppConfig.fs" />
+    <Compile Include="Core\DevContextProvider.fs" />
+    <Compile Include="Core\Model.fs" />
+    <Compile Include="ContextProviders\RepoContext.fs" />
+    <Compile Include="ContextProviders\GitContext.fs" />
+    <Compile Include="ContextProviders\JiraContext.fs" />
+    <Compile Include="ContextProviders\GitLabContext.fs" />
+    <Compile Include="Program.fs" />
+    <None Include="project.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FSharpPlus" Version="1.6.1" />
+    <PackageReference Include="FsToolkit.ErrorHandling.TaskResult" Version="4.15.1" />
+    <PackageReference Include="LibGit2Sharp" Version="0.30.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="NGitLab" Version="6.48.0" />
+    <PackageReference Include="RestSharp" Version="110.2.0" />
+    <PackageReference Include="Serilog.Extensions.Logging" Version="8.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <PackageReference Include="System.Text.Json" Version="8.0.3" />
+    <PackageReference Update="FSharp.Core" Version="8.0.200" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\libs\git-lab-api\Projects.GitLabApi.csproj" />
+    <ProjectReference Include="..\..\libs\jira-platform-api\Projects.JiraPlatformApi.csproj" />
+  </ItemGroup>
+
+</Project>

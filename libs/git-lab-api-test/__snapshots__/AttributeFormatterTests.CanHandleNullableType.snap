@@ -1,0 +1,22 @@
+﻿[
+  {
+    "Key": "nullable_int",
+    "Value": "1"
+  },
+  {
+    "Key": "nullable_string",
+    "Value": "value1"
+  },
+  {
+    "Key": "nullable_date_time",
+    "Value": "2021-01-01T00:00:00.000Z"
+  },
+  {
+    "Key": "nullable_bool",
+    "Value": "true"
+  },
+  {
+    "Key": "nullable_double",
+    "Value": "1"
+  }
+]
