@@ -23,7 +23,7 @@ public class ProjectDtoTests
       {
         JsonSerializer.Deserialize<ProjectDto>(
           json,
-          GitLabApi.JSONSerializerOptions);
+          GitLabApi.JsonSerializerOptions);
       });
   }
 }

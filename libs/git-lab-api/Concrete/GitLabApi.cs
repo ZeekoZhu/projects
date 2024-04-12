@@ -12,19 +12,19 @@ namespace Projects.GitLabApi.Concrete;
 public class GitLabApi(IRestClient client, LogInterceptor interceptor)
   : IGitLabApi
 {
-  public IProjectEndpoint Project { get; } =
-    new ProjectEndpoint(client, interceptor);
-
-  public IMergeRequestEndpoint MergeRequest { get; } =
-    new MergeRequestEndpoint(client, interceptor);
-
-  public static readonly JsonSerializerOptions JSONSerializerOptions =
+  public static readonly JsonSerializerOptions JsonSerializerOptions =
     new(JsonSerializerDefaults.Web)
     {
       Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
       PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
       UnmappedMemberHandling = JsonUnmappedMemberHandling.Skip
     };
+
+  public IProjectEndpoint Project { get; } =
+    new ProjectEndpoint(client, interceptor);
+
+  public IMergeRequestEndpoint MergeRequest { get; } =
+    new MergeRequestEndpoint(client, interceptor);
 
   public static GitLabApi Create(
     string baseUrl,
@@ -33,7 +33,7 @@ public class GitLabApi(IRestClient client, LogInterceptor interceptor)
   {
     var client = new RestClient(
         new RestClientOptions(baseUrl),
-        configureSerialization: s => s.UseSystemTextJson(JSONSerializerOptions))
+        configureSerialization: s => s.UseSystemTextJson(JsonSerializerOptions))
       .AddDefaultHeader("Authorization", $"Bearer {token}");
 
     return new GitLabApi(client, new LogInterceptor(logger));
@@ -60,9 +60,37 @@ public class MergeRequestEndpoint(
     resp.ThrowIfError();
     return new PaginationResult<MergeRequestDto>
     {
-      Items = resp.Data ?? Array.Empty<MergeRequestDto>(),
+      Items = resp.Data ?? [],
       Pagination = resp.ToPaginationInfo()
     };
+  }
+
+  public async Task<MergeRequestDto> CreateMergeRequestAsync(
+    string projectId,
+    CreateMergeRequestParams createMergeRequestParams,
+    CancellationToken cancellationToken = default)
+  {
+    var req = new RestRequest("/projects/{id}/merge_requests", Method.Post)
+      .AddUrlSegment("id", projectId)
+      .AddJsonBody(createMergeRequestParams)
+      .LogRequest(interceptor);
+
+    return (await client.PostAsync<MergeRequestDto>(req, cancellationToken))!;
+  }
+
+  public Task<MergeRequestDto?> UpdateMergeRequestAsync(
+    string projectId,
+    string mergeRequestIid,
+    UpdateMergeRequestParams updateMergeRequestParams,
+    CancellationToken cancellationToken = default)
+  {
+    var req = new RestRequest("/projects/{id}/merge_requests/{mergeRequestIid}", Method.Put)
+      .AddUrlSegment("id", projectId)
+      .AddUrlSegment("mergeRequestIid", mergeRequestIid)
+      .AddJsonBody(updateMergeRequestParams)
+      .LogRequest(interceptor);
+
+    return client.PutAsync<MergeRequestDto>(req, cancellationToken);
   }
 }
 
@@ -83,14 +111,16 @@ public class ProjectEndpoint(IRestClient client, LogInterceptor interceptor)
 
     return client.GetAsync<ProjectDto>(
       req,
-      cancellationToken: cancellationToken);
+      cancellationToken);
   }
 }
 
 internal static class GitLabApiExtensions
 {
+  private static readonly AttributeFormatter Formatter = new();
+
   /// <summary>
-  /// Convert Pascal case to snake_case
+  ///   Convert Pascal case to snake_case
   /// </summary>
   /// <param name="str"></param>
   /// <returns></returns>
@@ -99,8 +129,6 @@ internal static class GitLabApiExtensions
     return JsonNamingPolicy.SnakeCaseLower.ConvertName(str);
   }
 
-  private static readonly AttributeFormatter Formatter = new();
-
   public static RestRequest AddAttribute<T>(
     this RestRequest req,
     T? value)
@@ -108,9 +136,7 @@ internal static class GitLabApiExtensions
     if (value == null) return req;
 
     foreach (var (key, val) in Formatter.FormatAttributes(value))
-    {
       req.AddQueryParameter(key, val);
-    }
 
     return req;
   }
