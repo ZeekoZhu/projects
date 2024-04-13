@@ -39,6 +39,12 @@ type GitLabProjectOutput =
     SSHUrl: string
     HTTPUrl: string }
 
+[<AllowNullLiteral>]
+type GitLabCreateMRInput() =
+  member val Title = "" with get, set
+  member val Description = "" with get, set
+
+
 type IGitLabContext =
   abstract member MergeRequest: unit -> GitLabMROutput option Task
   abstract member Project: unit -> GitLabProjectOutput option Task
@@ -58,13 +64,8 @@ module GitLabUtils =
       let path = (Array.last parts).Replace(".git", "")
       path
 
-type GitLabContext
-  (
-    config: GitLabContextConfig,
-    git: IGitContext,
-    gitlabApi: IGitLabApi,
-    logger: ILogger<GitLabContext>
-  ) =
+type GitLabContext(config: GitLabContextConfig, git: IGitContext, gitlabApi: IGitLabApi, logger: ILogger<GitLabContext>)
+  =
   let fetchProject () =
     git.RemoteRepositoryUrl()
     |> Option.map GitLabUtils.getNamespacedPath
@@ -97,25 +98,59 @@ type GitLabContext
       return! fetchMR branch.FriendlyName (project.ID.ToString())
     }
 
+  let mrDtoToOutput (mr: MergeRequestDto) =
+    { IID = mr.Iid
+      Id = mr.Id
+      Title = mr.Title
+      Description = mr.Description
+      State = mr.State
+      WebURL = mr.WebUrl
+      SourceBranch = mr.SourceBranch
+      TargetBranch = mr.TargetBranch }
+
+  let createMRWithApi (input: GitLabCreateMRInput) projectId currentBranch targetBranch =
+    let param =
+      CreateMergeRequestParams(
+        SourceBranch = currentBranch.FriendlyName,
+        TargetBranch = targetBranch.FriendlyName,
+        Title = input.Title,
+        Description = input.Description
+      )
+
+    TaskResult.protect gitlabApi.MergeRequest.CreateMergeRequestAsync (projectId, param)
+
+
+  let createMergeRequest (input: GitLabCreateMRInput) =
+    // check if there is an open MR for the branch
+    // if yes, aborts.
+    let ensureNoMr =
+      fetchMergeRequest ()
+      |> map (Result.requireNone (exn "Merge request already exists"))
+
+    let projectId =
+      fetchProject ()
+      |> map (map (_.ID >> string) >> Result.requireSome (exn "Project not found"))
+
+    let branch = git.Branch() |> Result.requireSome (exn "Branch not found")
+
+    let mergeTargetBranch =
+      git.MergeTargetBranch()
+      |> Result.requireSome (exn "Merge target branch not found")
+
+    createMRWithApi input
+    |> konst
+    |> TaskResult.liftApply ensureNoMr
+    |> TaskResult.applyF projectId
+    |> TaskResult.applyResultF branch
+    |> TaskResult.applyResultF mergeTargetBranch
+    |> TaskResult.bind id
+    |> TaskResult.map mrDtoToOutput
+
   interface IGitLabContext with
     member this.MergeRequest() =
-      taskOption {
-        let! mr = fetchMergeRequest ()
-
-        return
-          { Id = mr.Id
-            IID = mr.Iid
-            Title = mr.Title
-            Description = mr.Description
-            State = mr.State
-            WebURL = mr.WebUrl
-            SourceBranch = mr.SourceBranch
-            TargetBranch = mr.TargetBranch }
-      }
+      fetchMergeRequest () |> TaskOption.map mrDtoToOutput
 
     member this.Project() = fetchProject ()
-
-
 
 module GitLabContextConfig =
 
@@ -125,21 +160,15 @@ module GitLabContextConfig =
     validation {
       let! config =
         config
-        |> Validations.notNone
-          id
-          "Please provide GitLab configuration in config file"
+        |> Validations.notNone id "Please provide GitLab configuration in config file"
 
       let! _ =
         config
-        |> Validations.nonEmptyString
-          (_.Host)
-          (konst """Host can not be empty""")
+        |> Validations.nonEmptyString (_.Host) (konst """Host can not be empty""")
 
       let! _ =
         config
-        |> Validations.nonEmptyString
-          (_.Token)
-          (konst """Token can not be empty""")
+        |> Validations.nonEmptyString (_.Token) (konst """Token can not be empty""")
 
       return config
     }

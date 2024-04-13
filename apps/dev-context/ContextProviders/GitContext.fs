@@ -24,6 +24,7 @@ type IGitContext =
   abstract member Branch: unit -> BranchInfo option
   abstract member RemoteRepositoryUrl: unit -> string option
   abstract member Commits: unit -> CommitInfo list
+  abstract member MergeTargetBranch: unit -> BranchInfo option
 
 type GitContext(repoCtx: IRepoContext, logger: ILogger<GitContext>) =
   let currentGitRepo () =
@@ -38,12 +39,17 @@ type GitContext(repoCtx: IRepoContext, logger: ILogger<GitContext>) =
     |> Option.teeSome (fun b -> logger.LogDebug("Current branch: {branch}", b.CanonicalName))
     |> Option.teeNone (fun () -> logger.LogWarning("No current branch found"))
 
-  let defaultBranch (repo: Repository) =
+  /// find the default merge target branch
+  /// todo: make the default branch configurable
+  let tryFindMergeTargetBranch (repo: Repository) =
     repo.Branches
     |> Seq.tryFind (fun b ->
       b.CanonicalName.Equals("refs/heads/main", StringComparison.InvariantCultureIgnoreCase)
       || b.CanonicalName.Equals("refs/heads/master", StringComparison.InvariantCultureIgnoreCase))
-    // todo: make the default branch configurable
+    |> Option.teeSome (fun b -> logger.LogDebug("Merge target branch: {branch}", b.CanonicalName))
+
+  let defaultBranch (repo: Repository) =
+    tryFindMergeTargetBranch repo
     |> Option.defaultWith (fun () -> failwith "Unable to find default branch")
 
   let commitsMissingInDefault (repo: Repository) (branch: Branch) =
@@ -93,6 +99,17 @@ type GitContext(repoCtx: IRepoContext, logger: ILogger<GitContext>) =
       }
 
     member this.Commits() = currentBranchCommits ()
+
+    member this.MergeTargetBranch() =
+      monad {
+        let! repoDir = currentGitRepo ()
+        use repo = new Repository(repoDir)
+        let! branch = tryFindMergeTargetBranch repo
+
+        return
+          { FriendlyName = branch.FriendlyName
+            FullName = branch.CanonicalName }
+      }
 
 
 module GitCommand =
