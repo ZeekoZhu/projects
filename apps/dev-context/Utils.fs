@@ -61,6 +61,9 @@ module Validations =
       let message = String.Join(Environment.NewLine, errs)
       ValidationException(message) :> exn)
 
+module Result =
+  let inline require (predicate: 'a -> bool) (error: 'e) (value: 'a) =
+    if predicate value then Ok value else Error error
 
 module TaskResult =
   let inline liftApply (x: TaskResult<'a, 'e>) (f: 'a -> 'b) = TaskResult.map f x
@@ -70,6 +73,8 @@ module TaskResult =
       f x |> TaskResult.ofTask
     with ex ->
       Task.FromResult(Error ex)
+
+  let inline bindResult f = Result.bind f |> Task.map
 
   let inline applyF (x: TaskResult<'a, 'e>) (f: TaskResult<'a -> 'b, 'e>) = TaskResult.map2 id f x
 

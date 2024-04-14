@@ -73,6 +73,7 @@ type IGitLabContext =
   abstract member MergeRequest: unit -> GitLabMROutput option Task
   abstract member Project: unit -> GitLabProjectOutput option Task
   abstract member CreateMergeRequest: GitLabCreateMRInput -> Result<GitLabMROutput, exn> Task
+  abstract member UpdateMergeRequest: GitLabCreateMRInput -> Result<GitLabMROutput, exn> Task
 
 module GitLabUtils =
   let private pattern = Regex("^(http|https)://", RegexOptions.Compiled)
@@ -144,6 +145,11 @@ type GitLabContext(config: GitLabContextConfig, git: IGitContext, gitlabApi: IGi
 
     TaskResult.protect gitlabApi.MergeRequest.CreateMergeRequestAsync (projectId, param)
 
+  let updateMRWithApi (input: GitLabCreateMRInput) projectId mrIid =
+    let param =
+      UpdateMergeRequestParams(Title = input.Title, Description = input.Description)
+
+    TaskResult.protect gitlabApi.MergeRequest.UpdateMergeRequestAsync (projectId, mrIid, param)
 
   let createMergeRequest (input: GitLabCreateMRInput) =
     // check if there is an open MR for the branch
@@ -171,12 +177,28 @@ type GitLabContext(config: GitLabContextConfig, git: IGitContext, gitlabApi: IGi
     |> TaskResult.bind id
     |> TaskResult.map mrDtoToOutput
 
+  let updateMergeRequest (input: GitLabCreateMRInput) =
+    let ensureMr =
+      fetchMergeRequest ()
+      |> Task.map (Result.requireSome (exn "Merge request not found"))
+      |> TaskResult.bindResult (Result.require (fun mr -> mr.State = "opened") (exn "Merge request is not opened"))
+
+    let projectId = ensureMr |> TaskResult.map ((_.ProjectId) >> string)
+    let mrIid = ensureMr |> TaskResult.map (_.Iid >> string)
+
+    updateMRWithApi input
+    |> TaskResult.liftApply projectId
+    |> TaskResult.applyF mrIid
+    |> TaskResult.bind id
+    |> TaskResult.map mrDtoToOutput
+
   interface IGitLabContext with
     member this.MergeRequest() =
       fetchMergeRequest () |> TaskOption.map mrDtoToOutput
 
     member this.Project() = fetchProject ()
     member this.CreateMergeRequest input = createMergeRequest input
+    member this.UpdateMergeRequest(input) = updateMergeRequest input
 
 module GitLabContextConfig =
   open Validator
@@ -269,7 +291,27 @@ module GitLabCommand =
       inputPath
     )
 
-    [ Get project; Get mergeRequest; Act createMR ]
+    let updateMR = Command("gitlab:mr:update", "Update a merge request")
+    updateMR.Add(inputPath)
+
+    updateMR.SetHandler(
+      (fun inputPath ->
+        let sp = configureServices ()
+        let gitlabCtx = sp.GetService<IGitLabContext>()
+
+        taskResult {
+          let! mr =
+            GitLabInput.readCreateMRInput inputPath
+            |> TaskResult.bind gitlabCtx.UpdateMergeRequest
+
+          writeToConsole mr
+        }
+        |> TaskResult.teeError raise
+        :> Task),
+      inputPath
+    )
+
+    [ Get project; Get mergeRequest; Act createMR; Act updateMR ]
 
 
 type GitLabContextCommandProvider() =
