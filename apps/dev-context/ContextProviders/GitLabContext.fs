@@ -2,6 +2,7 @@ namespace Projects.DevContext.ContextProviders
 
 open System
 open System.CommandLine
+open System.IO
 open System.Text.RegularExpressions
 open System.Threading.Tasks
 open Microsoft.Extensions.DependencyInjection
@@ -15,6 +16,7 @@ open Projects.DevContext.Utils
 open Projects.GitLabApi.Abstraction
 open Projects.GitLabApi.Concrete
 open Projects.GitLabApi.Model
+open YamlDotNet.Serialization
 
 [<AllowNullLiteral>]
 type GitLabContextConfig() =
@@ -44,6 +46,26 @@ type GitLabCreateMRInput() =
   member val Title = "" with get, set
   member val Description = "" with get, set
 
+module GitLabInput =
+  open Validator
+  let deserializer =
+    DeserializerBuilder()
+      .WithNamingConvention(NamingConventions.CamelCaseNamingConvention.Instance)
+      .Build()
+
+  let parseCreateMRYaml<'a when 'a : null> (content: string) = deserializer.Deserialize<'a>(content) |> Option.ofObj
+
+  let validateCreateMRInput (input: GitLabCreateMRInput) =
+    input |>
+    (Validations.nonEmptyString _.Title (konst """Title can not be empty"""))
+    @ (Validations.nonEmptyString _.Description (konst """Description can not be empty"""))
+    |> Validations.toValidationException
+
+  let readCreateMRInput (path: FileInfo) =
+    TaskResult.protect File.ReadAllTextAsync path.FullName
+    |> TaskResult.map parseCreateMRYaml<GitLabCreateMRInput>
+    |> TaskResult.bindRequireSome (exn "Failed to parse input file")
+    |> Task.map (Result.bind validateCreateMRInput)
 
 type IGitLabContext =
   abstract member MergeRequest: unit -> GitLabMROutput option Task
@@ -153,25 +175,13 @@ type GitLabContext(config: GitLabContextConfig, git: IGitContext, gitlabApi: IGi
     member this.Project() = fetchProject ()
 
 module GitLabContextConfig =
+  open Validator
 
   let readConfig () =
-    let config = AppConfig.section<GitLabContextConfig> "GitLab"
-
-    validation {
-      let! config =
-        config
-        |> Validations.notNone id "Please provide GitLab configuration in config file"
-
-      let! _ =
-        config
-        |> Validations.nonEmptyString (_.Host) (konst """Host can not be empty""")
-
-      let! _ =
-        config
-        |> Validations.nonEmptyString (_.Token) (konst """Token can not be empty""")
-
-      return config
-    }
+    AppConfig.section<GitLabContextConfig> "GitLab"
+      |> (Validations.notNone id "Please provide GitLab configuration in config file"
+      @ Validations.nonEmptyString (_.Host) (konst """Host can not be empty""")
+      @ Validations.nonEmptyString (_.Token) (konst """Token can not be empty"""))
 
 module GitLabCommand =
   let addGitLabContext (services: IServiceCollection) =

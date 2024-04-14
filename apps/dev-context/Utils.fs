@@ -2,12 +2,15 @@ module Projects.DevContext.Utils
 
 
 open System
+open System.ComponentModel.DataAnnotations
 open System.Text.Encodings.Web
 open System.Text.Json
 open System.Threading.Tasks
 open FsToolkit.ErrorHandling
 open Microsoft.Extensions.DependencyInjection
+open Microsoft.FSharp.Core
 open Serilog
+open FSharpPlus
 
 let private jsonOptions =
   JsonSerializerOptions(JsonSerializerDefaults.Web, Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping)
@@ -29,7 +32,14 @@ module DI =
 
   let buildServiceProvider (services: IServiceCollection) = services.BuildServiceProvider()
 
+module Validator =
+  type Validator<'a, 'b, 'e> = 'a -> Validation<'b, 'e>
+
+  let (@) (x: Validator<'a, 'b, 'e>) (y: Validator<'b, 'c, 'e>) = x >> (Validation.bind y)
+
+
 module Validations =
+
   let notNone selector message target =
     let value = selector target
 
@@ -45,8 +55,16 @@ module Validations =
     else
       Validation.ok target
 
+  let toValidationException (x: Validation<'a, string>) =
+    x
+    |> Result.mapError (fun errs ->
+      let message = String.Join(Environment.NewLine, errs)
+      ValidationException(message) :> exn)
+
+
 module TaskResult =
-  let inline liftApply (x: TaskResult<'a, 'e>) (f: 'a -> 'b)  = TaskResult.map f x
+  let inline liftApply (x: TaskResult<'a, 'e>) (f: 'a -> 'b) = TaskResult.map f x
+
   let inline protect (f: 'a -> 'b Task) (x: 'a) =
     try
       f x |> TaskResult.ofTask
