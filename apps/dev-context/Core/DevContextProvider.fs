@@ -2,5 +2,9 @@ namespace Projects.DevContext.Core
 
 open System.CommandLine
 
+type ContextCommand =
+  | Get of Command
+  | Act of Command
+
 type IDevContextCommandProvider =
-  abstract member AddGetCommands: Command -> unit
+  abstract member CreateCommands: unit -> ContextCommand list

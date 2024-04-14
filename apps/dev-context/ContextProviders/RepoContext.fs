@@ -24,12 +24,9 @@ module RepoCommand =
     services.AddSingleton<IRepoContext, RepoContext>()
 
   let private configureServices () =
-    ServiceCollection()
-    |> DI.addLogger
-    |> addRepoContext
-    |> DI.buildServiceProvider
+    ServiceCollection() |> DI.addLogger |> addRepoContext |> DI.buildServiceProvider
 
-  let addGetCommands (get: Command) =
+  let commands () =
     let cmd = Command("repo:dir", "Get the current working directory")
 
     cmd.SetHandler(fun () ->
@@ -37,8 +34,8 @@ module RepoCommand =
       let repo = sp.GetService<IRepoContext>()
       writeToConsole (repo.Dir()))
 
-    get.Add(cmd)
+    [ Get cmd ]
 
 type RepoContextCommandProvider() =
   interface IDevContextCommandProvider with
-    member this.AddGetCommands(get) = RepoCommand.addGetCommands get
+    member this.CreateCommands() = RepoCommand.commands ()

@@ -22,6 +22,9 @@ let rootCommand = RootCommand(Name = "dev-ctx")
 let getCommand = Command("get", "Get the current development context")
 rootCommand.AddCommand(getCommand)
 
+let actCommand = Command("act", "Act on the current development context")
+rootCommand.AddCommand(actCommand)
+
 let commandProviders: IDevContextCommandProvider list =
   [ RepoContextCommandProvider()
     GitContextCommandProvider()
@@ -29,7 +32,10 @@ let commandProviders: IDevContextCommandProvider list =
     GitLabContextCommandProvider() ]
 
 commandProviders
-|> List.iter (fun provider -> provider.AddGetCommands getCommand)
+|> List.collect (_.CreateCommands())
+|> List.iter (function
+  | Get cmd -> getCommand.Add(cmd)
+  | Act cmd -> actCommand.Add(cmd))
 
 
 [<EntryPoint>]

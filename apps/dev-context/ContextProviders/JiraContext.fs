@@ -77,8 +77,7 @@ type JiraContext
 
   let getIssueByKey (key: string) =
     TaskResult.ofTask (jiraIssuesApi.GetIssueAsync(key))
-    |> TaskResult.teeError (fun (err: exn) ->
-      logger.LogError(err, "Failed to get issue by key '{Key}'", key))
+    |> TaskResult.teeError (fun (err: exn) -> logger.LogError(err, "Failed to get issue by key '{Key}'", key))
     |> Task.map Result.toOption
 
   let tryGetString key (dict: IDictionary<string, obj>) =
@@ -94,8 +93,7 @@ type JiraContext
   let toIssueOutput (issue: IssueBean) =
     { IssueKey = issue.Key
       Summary = issue.Fields |> tryGetString "summary" |> Option.defaultValue ""
-      Description =
-        issue.Fields |> tryGetString "description" |> Option.defaultValue ""
+      Description = issue.Fields |> tryGetString "description" |> Option.defaultValue ""
       Status =
         issue.Fields
         |> tryGetJObject "status"
@@ -117,9 +115,7 @@ module JiraContextConfig =
 
   let private nonEmptyPrefix (config: JiraContextConfig) =
     config
-    |> Validations.nonEmptyString
-      (_.IssueKeyPrefix)
-      (konst "Jira issue key prefix must not be empty")
+    |> Validations.nonEmptyString (_.IssueKeyPrefix) (konst "Jira issue key prefix must not be empty")
 
   let private validAuthInfo (config: JiraContextConfig) =
     match config.Username, config.Password, config.PersonalAccessToken with
@@ -128,22 +124,18 @@ module JiraContextConfig =
       && not <| String.IsNullOrWhiteSpace password
       ->
       Validation.ok (BasicAuth(username, password))
-    | _, _, pat when not <| String.IsNullOrWhiteSpace pat ->
-      Validation.ok (PAT pat)
+    | _, _, pat when not <| String.IsNullOrWhiteSpace pat -> Validation.ok (PAT pat)
     | _ ->
       Validation.error
         "Jira authentication information is invalid, please provide either (Username, Password) or (PersonalAccessToken)"
 
   let private nonEmptyBaseUrl (config: JiraContextConfig) =
     config
-    |> Validations.nonEmptyString
-      (_.BaseUrl)
-      (konst "Jira base url must not be empty")
+    |> Validations.nonEmptyString (_.BaseUrl) (konst "Jira base url must not be empty")
 
   let parseConfig (config: JiraContextConfig option) =
     validation {
-      let! config =
-        config |> Validations.notNone id "Jira context configuration is missing"
+      let! config = config |> Validations.notNone id "Jira context configuration is missing"
 
       let! _ = nonEmptyPrefix config
       let! _ = nonEmptyBaseUrl config
@@ -194,19 +186,14 @@ module JiraCommand =
     |> addJiraContext
     |> DI.buildServiceProvider
 
-  let addGetCommands (get: Command) =
+  let commands () =
     let issueKey =
-      Command(
-        "jira:issuekey",
-        "Get the Jira issue key from the current branch or repo directory"
-      )
+      Command("jira:issuekey", "Get the Jira issue key from the current branch or repo directory")
 
     issueKey.SetHandler(fun () ->
       use sp = configureServices ()
       let jiraCtx = sp.GetService<IJiraContext>()
       writeToConsole (jiraCtx.IssueKey()))
-
-    get.Add(issueKey)
 
     let issueDetail = Command("jira:issue", "Get the Jira issue details")
 
@@ -220,9 +207,9 @@ module JiraCommand =
       }
       :> Task)
 
-    get.Add(issueDetail)
+    [ Get issueKey; Get issueDetail ]
 
 
 type JiraContextCommandProvider() =
   interface IDevContextCommandProvider with
-    member _.AddGetCommands(get: Command) = JiraCommand.addGetCommands get
+    member _.CreateCommands() = JiraCommand.commands ()

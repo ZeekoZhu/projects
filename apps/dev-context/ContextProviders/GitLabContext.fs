@@ -48,17 +48,19 @@ type GitLabCreateMRInput() =
 
 module GitLabInput =
   open Validator
+
   let deserializer =
     DeserializerBuilder()
       .WithNamingConvention(NamingConventions.CamelCaseNamingConvention.Instance)
       .Build()
 
-  let parseCreateMRYaml<'a when 'a : null> (content: string) = deserializer.Deserialize<'a>(content) |> Option.ofObj
+  let parseCreateMRYaml<'a when 'a: null> (content: string) =
+    deserializer.Deserialize<'a>(content) |> Option.ofObj
 
   let validateCreateMRInput (input: GitLabCreateMRInput) =
-    input |>
-    (Validations.nonEmptyString _.Title (konst """Title can not be empty"""))
-    @ (Validations.nonEmptyString _.Description (konst """Description can not be empty"""))
+    input
+    |> (Validations.nonEmptyString (_.Title) (konst """Title can not be empty"""))
+       @ (Validations.nonEmptyString (_.Description) (konst """Description can not be empty"""))
     |> Validations.toValidationException
 
   let readCreateMRInput (path: FileInfo) =
@@ -70,6 +72,7 @@ module GitLabInput =
 type IGitLabContext =
   abstract member MergeRequest: unit -> GitLabMROutput option Task
   abstract member Project: unit -> GitLabProjectOutput option Task
+  abstract member CreateMergeRequest: GitLabCreateMRInput -> Result<GitLabMROutput, exn> Task
 
 module GitLabUtils =
   let private pattern = Regex("^(http|https)://", RegexOptions.Compiled)
@@ -173,15 +176,16 @@ type GitLabContext(config: GitLabContextConfig, git: IGitContext, gitlabApi: IGi
       fetchMergeRequest () |> TaskOption.map mrDtoToOutput
 
     member this.Project() = fetchProject ()
+    member this.CreateMergeRequest input = createMergeRequest input
 
 module GitLabContextConfig =
   open Validator
 
   let readConfig () =
     AppConfig.section<GitLabContextConfig> "GitLab"
-      |> (Validations.notNone id "Please provide GitLab configuration in config file"
-      @ Validations.nonEmptyString (_.Host) (konst """Host can not be empty""")
-      @ Validations.nonEmptyString (_.Token) (konst """Token can not be empty"""))
+    |> (Validations.notNone id "Please provide GitLab configuration in config file"
+        @ Validations.nonEmptyString (_.Host) (konst """Host can not be empty""")
+        @ Validations.nonEmptyString (_.Token) (konst """Token can not be empty"""))
 
 module GitLabCommand =
   let addGitLabContext (services: IServiceCollection) =
@@ -208,7 +212,7 @@ module GitLabCommand =
     |> RepoCommand.addRepoContext
     |> DI.buildServiceProvider
 
-  let addGetCommands (get: Command) =
+  let commands () =
     // Project
     let project = Command("gitlab:project", "Get project information")
 
@@ -222,7 +226,6 @@ module GitLabCommand =
       }
       :> Task)
 
-    get.Add(project)
 
     // Merge Request
     let mergeRequest = Command("gitlab:mr", "Get merge request information")
@@ -237,9 +240,38 @@ module GitLabCommand =
       }
       :> Task)
 
-    get.Add(mergeRequest)
+    let createMR = Command("gitlab:mr:create", "Create a merge request")
+
+    let inputPath =
+      CommandLine.Option<FileInfo>(
+        [| "-i"; "--input" |],
+        "Path to the input file",
+        IsRequired = true,
+        Arity = ArgumentArity.ExactlyOne
+      )
+
+    createMR.Add(inputPath)
+
+    createMR.SetHandler(
+      (fun inputPath ->
+        let sp = configureServices ()
+        let gitlabCtx = sp.GetService<IGitLabContext>()
+
+        taskResult {
+          let! mr =
+            GitLabInput.readCreateMRInput inputPath
+            |> TaskResult.bind gitlabCtx.CreateMergeRequest
+
+          writeToConsole mr
+        }
+        |> TaskResult.teeError raise
+        :> Task),
+      inputPath
+    )
+
+    [ Get project; Get mergeRequest; Act createMR ]
 
 
 type GitLabContextCommandProvider() =
   interface IDevContextCommandProvider with
-    member this.AddGetCommands(get: Command) = GitLabCommand.addGetCommands get
+    member this.CreateCommands() = GitLabCommand.commands ()

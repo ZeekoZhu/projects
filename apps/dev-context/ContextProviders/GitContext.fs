@@ -125,27 +125,24 @@ module GitCommand =
     |> DI.addLogger
     |> DI.buildServiceProvider
 
-  let addGetCommands (get: Command) =
-    let cmd = Command("git:branch", "Get the current branch")
+  let commands () =
+    let branch = Command("git:branch", "Get the current branch")
 
-    cmd.SetHandler(fun () ->
+    branch.SetHandler(fun () ->
       use sp = configureServices ()
       let gitCtx = sp.GetRequiredService<IGitContext>()
       writeToConsole (gitCtx.Branch()))
 
-    get.Add(cmd)
-
-    let listCommitsCmd =
+    let commits =
       Command("git:commits", "List commits to be merged on the current branch")
 
-    listCommitsCmd.SetHandler(fun () ->
+    commits.SetHandler(fun () ->
       use sp = configureServices ()
       let gitCtx = sp.GetRequiredService<IGitContext>()
       writeToConsole (gitCtx.Commits()))
 
-    get.Add(listCommitsCmd)
-
+    [ Get branch; Get commits ]
 
 type GitContextCommandProvider() =
   interface IDevContextCommandProvider with
-    member _.AddGetCommands(get: Command) = GitCommand.addGetCommands get
+    member _.CreateCommands() = GitCommand.commands ()
