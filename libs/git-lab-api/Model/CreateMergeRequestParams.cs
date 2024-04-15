@@ -79,5 +79,5 @@ public class CreateMergeRequestParams
   /// <summary>
   ///   Numeric ID of the target project.
   /// </summary>
-  public int TargetProjectId { get; set; }
+  public int? TargetProjectId { get; set; }
 }

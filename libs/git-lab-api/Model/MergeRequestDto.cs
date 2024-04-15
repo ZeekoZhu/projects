@@ -193,7 +193,7 @@ public class MergeRequestDto
     /// <summary>
     /// Indicates whether the source branch should be forcibly removed after merging.
     /// </summary>
-    public required bool ForceRemoveSourceBranch { get; set; }
+    public bool? ForceRemoveSourceBranch { get; set; }
 
     /// <summary>
     /// Indicates whether collaboration is allowed.

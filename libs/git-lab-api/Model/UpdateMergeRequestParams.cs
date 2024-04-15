@@ -5,13 +5,6 @@ namespace Projects.GitLabApi.Model;
 /// </summary>
 public class UpdateMergeRequestParams
 {
-  public required string Id { get; set; }
-
-  /// <summary>
-  ///
-  /// </summary>
-  public required int MergeRequestIid { get; set; }
-
   /// <summary>
   ///   Comma-separated label names to add to a merge request.
   /// </summary>

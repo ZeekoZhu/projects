@@ -34,7 +34,8 @@ public class GitLabApi(IRestClient client, LogInterceptor interceptor)
     var client = new RestClient(
         new RestClientOptions(baseUrl),
         configureSerialization: s => s.UseSystemTextJson(JsonSerializerOptions))
-      .AddDefaultHeader("Authorization", $"Bearer {token}");
+      .AddDefaultHeader("Authorization", $"Bearer {token}")
+      .AddDefaultHeader("Content-Type", ContentType.Json.Value);
 
     return new GitLabApi(client, new LogInterceptor(logger));
   }
@@ -84,7 +85,8 @@ public class MergeRequestEndpoint(
     UpdateMergeRequestParams updateMergeRequestParams,
     CancellationToken cancellationToken = default)
   {
-    var req = new RestRequest("/projects/{id}/merge_requests/{mergeRequestIid}", Method.Put)
+    var req = new RestRequest("/projects/{id}/merge_requests/{mergeRequestIid}",
+        Method.Put)
       .AddUrlSegment("id", projectId)
       .AddUrlSegment("mergeRequestIid", mergeRequestIid)
       .AddJsonBody(updateMergeRequestParams)

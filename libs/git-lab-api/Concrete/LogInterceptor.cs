@@ -15,6 +15,40 @@ public class LogInterceptor(ILogger<IGitLabApi> logger)
       requestMessage.Method,
       requestMessage.RequestUri);
 
+    if (!logger.IsEnabled(LogLevel.Debug)) return ValueTask.CompletedTask;
+    try
+    {
+      var headers = requestMessage.Headers;
+      logger.LogDebug(
+        "--- Request Headers ---\n{Headers}\n--- End of Request Headers ---",
+        headers.Select(it => $"{it.Key}: {string.Join(", ", it.Value)}"));
+    }
+    catch (Exception e)
+    {
+      // ignore
+    }
+
+    try
+    {
+      if (requestMessage.Content != null)
+      {
+        var content =
+          requestMessage.Content.ReadAsStringAsync(cancellationToken).Result;
+        logger.LogDebug(
+          "--- Request Content ---\n{Content}\n--- End of Request Content ---",
+          content);
+      }
+      else
+      {
+        logger.LogDebug(
+          "--- Request Content ---\n<empty>\n--- End of Request Content ---");
+      }
+    }
+    catch (Exception e)
+    {
+      // ignore
+    }
+
     return ValueTask.CompletedTask;
   }
 
