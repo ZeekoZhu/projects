@@ -9,10 +9,11 @@
     <Content Include="example.json" />
     <Compile Include="Json.fs" />
     <Compile Include="Types.fs" />
-    <Compile Include="RenameInvoice.fs" />
     <Compile Include="Stats.fs" />
+    <Compile Include="RenameInvoice.fs" />
     <Compile Include="InvoiceClassifier.fs" />
     <Compile Include="RenameCommand.fs" />
+    <Compile Include="StatsCommand.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
@@ -22,6 +23,8 @@
     <PackageReference Include="FSharp.Data" Version="6.4.0" />
     <PackageReference Include="FSharpPlus" Version="1.6.1" />
     <PackageReference Include="FsToolkit.ErrorHandling" Version="4.15.1" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+    <PackageReference Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageReference Include="Spectre.Console" Version="0.48.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
     <PackageReference Update="FSharp.Core" Version="8.0.200" />

@@ -5,6 +5,8 @@ open System.IO
 open System.Text.Encodings.Web
 open System.Text.Json
 open FSharpPlus
+open FsToolkit.ErrorHandling
+open Serilog
 
 type InvoiceDetailItem = { Name: string }
 
@@ -30,7 +32,12 @@ let toJson<'T> (value: 'T) = Json.toJson<'T> configJsonOptions value
 
 let readInvoiceInfo (file: FileInfo) =
   let content = File.ReadAllText file.FullName
+
   Result.protect fromJson<InvoiceInfo> content
+  |> Result.teeError (fun e ->
+    Log
+      .ForContext<InvoiceInfo>()
+      .Error(e, "Failed to parse invoice info from {file}", file.FullName))
 
 let writeInvoiceInfo (file: FileInfo) (info: InvoiceInfo) =
   let content = toJson info

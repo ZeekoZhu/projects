@@ -1,6 +1,6 @@
 module RenameInvoice.InvoiceClassifier
 
-open RenameInvoice.RenameInvoice
+open RenameInvoice.Types
 
 type InvoiceCategoryRule = { Name: string; Keywords: string list }
 
