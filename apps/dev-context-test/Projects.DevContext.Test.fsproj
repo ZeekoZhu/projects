@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="JiraContextTests.fs" />
     <Compile Include="GitLabContextTests.fs" />
+    <Compile Include="GitHubContextTests.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 

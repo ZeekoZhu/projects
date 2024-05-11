@@ -13,6 +13,7 @@
     <Compile Include="ContextProviders\RepoContext.fs" />
     <Compile Include="ContextProviders\GitContext.fs" />
     <Compile Include="ContextProviders\JiraContext.fs" />
+    <Compile Include="ContextProviders\GitHubContext.fs" />
     <Compile Include="ContextProviders\GitLabContext.fs" />
     <Compile Include="Program.fs" />
     <None Include="project.json" />
