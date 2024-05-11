@@ -32,6 +32,16 @@
       "configurations": {
         "production": {
           "configuration": "Release"
+        },
+        "npm-linux-x64": {
+          "configuration": "Release",
+          "selfContained": true,
+          "runtime": "linux-x64"
+        },
+        "npm-win-x64": {
+          "configuration": "Release",
+          "selfContained": true,
+          "runtime": "win-x64"
         }
       }
     }
