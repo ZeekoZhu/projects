@@ -29,7 +29,8 @@ let commandProviders: IDevContextCommandProvider list =
   [ RepoContextCommandProvider()
     GitContextCommandProvider()
     JiraContextCommandProvider()
-    GitLabContextCommandProvider() ]
+    GitLabContextCommandProvider()
+    GitHubContextCommandProvider() ]
 
 commandProviders
 |> List.collect (_.CreateCommands())

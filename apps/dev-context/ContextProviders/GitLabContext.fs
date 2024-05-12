@@ -171,9 +171,9 @@ type GitLabContext(config: GitLabContextConfig, git: IGitContext, gitlabApi: IGi
     createMRWithApi input
     |> konst
     |> TaskResult.liftApply ensureNoMr
-    |> TaskResult.applyF projectId
-    |> TaskResult.applyResultF branch
-    |> TaskResult.applyResultF mergeTargetBranch
+    |> TaskResult.applyTR projectId
+    |> TaskResult.applyR branch
+    |> TaskResult.applyR mergeTargetBranch
     |> TaskResult.bind id
     |> TaskResult.map mrDtoToOutput
 
@@ -188,7 +188,7 @@ type GitLabContext(config: GitLabContextConfig, git: IGitContext, gitlabApi: IGi
 
     updateMRWithApi input
     |> TaskResult.liftApply projectId
-    |> TaskResult.applyF mrIid
+    |> TaskResult.applyTR mrIid
     |> TaskResult.bind id
     |> TaskResult.map mrDtoToOutput
 

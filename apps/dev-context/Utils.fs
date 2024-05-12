@@ -7,6 +7,7 @@ open System.Text.Encodings.Web
 open System.Text.Json
 open System.Threading.Tasks
 open FsToolkit.ErrorHandling
+open FsToolkit.ErrorHandling.Operator.TaskOption
 open Microsoft.Extensions.DependencyInjection
 open Microsoft.FSharp.Core
 open Serilog
@@ -47,6 +48,13 @@ module Validations =
     | Some v -> Validation.ok v
     | _ -> Validation.error message
 
+  let inline teeError fn (r: Validation<_, _>) =
+    Validation.mapError
+      (fun e ->
+        fn e
+        e)
+      r
+
   let nonEmptyString selector message target =
     let value = selector target
 
@@ -76,7 +84,11 @@ module TaskResult =
 
   let inline bindResult f = Result.bind f |> Task.map
 
-  let inline applyF (x: TaskResult<'a, 'e>) (f: TaskResult<'a -> 'b, 'e>) = TaskResult.map2 id f x
+  let inline applyTR (x: TaskResult<'a, 'e>) (f: TaskResult<'a -> 'b, 'e>) = TaskResult.map2 id f x
 
-  let inline applyResultF (x: Result<'a, 'e>) (f: TaskResult<'a -> 'b, 'e>) =
+  let inline applyR (x: Result<'a, 'e>) (f: TaskResult<'a -> 'b, 'e>) =
     f |> Task.map (fun f -> Result.apply f x)
+
+module TaskOption =
+  let inline iter fn tO =
+    Task.map (Option.iter fn) tO
