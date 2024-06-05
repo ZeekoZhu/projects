@@ -10,7 +10,7 @@ public class X11Helper
   {
     try
     {
-      var configFilePath = Path.Join(
+      var configFilePath = System.IO.Path.Join(
         Environment.GetEnvironmentVariable("HOME"),
         ".config",
         "xsettingsd",
