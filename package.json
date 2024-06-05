@@ -43,7 +43,7 @@
     "jest-preset-angular": "14.0.4",
     "jsonc-eslint-parser": "^2.1.0",
     "nx": "19.0.2",
-    "nx-remotecache-minio": "^17.0.0",
+    "nx-remotecache-minio": "^18.0.0",
     "postcss": "^8.4.5",
     "prettier": "^2.8.8",
     "tailwindcss": "^3.0.2",
