@@ -1,10 +1,12 @@
+using Splat;
+
 namespace Projects.AvaloniaUtils.HotReload;
 
 /// <summary>
 /// A hot reload window under development.
 /// Press Ctrl + R to reload the view.
 /// </summary>
-public class HotReloadWindow : Window
+public class HotReloadWindow : Window, IEnableLogger
 {
   private readonly Func<Window, object> _contentRender;
 
@@ -13,7 +15,7 @@ public class HotReloadWindow : Window
   public HotReloadWindow(Func<Window, object> contentRender)
   {
     _contentRender = contentRender;
-    Content = contentRender(this);
+    _contentRender(this);
   }
 
   /// <summary>
@@ -48,8 +50,8 @@ public class HotReloadWindow : Window
     if (IsHotReloadEnabled())
       if (_hotReloadGesture.Matches(e))
       {
-        Content = _contentRender(this);
-        Console.WriteLine("View reloaded.");
+        _contentRender(this);
+        this.Log().Info("Refreshed view.");
       }
 
     base.OnKeyDown(e);
