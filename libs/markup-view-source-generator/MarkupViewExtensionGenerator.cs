@@ -10,13 +10,10 @@ public class MarkupViewExtensionGenerator : ISourceGenerator
 {
   public void Initialize(GeneratorInitializationContext context)
   {
-    #if DEBUG
-                if (!Debugger.IsAttached)
-                {
-                    Debugger.Launch();
-                }
-    #endif
-                Debug.WriteLine("Initalize code generator");
+#if DEBUG
+    if (!Debugger.IsAttached) Debugger.Launch();
+#endif
+    Debug.WriteLine("Initalize code generator");
     // No initialization required for this one
   }
 
@@ -207,7 +204,7 @@ public class MarkupViewExtensionGenerator : ISourceGenerator
         // public static T OnKeyDownHandler<T>(
         //   this T obj,
         //   Action<T, KeyEventArgs> action,
-        //   RoutingStrategies routes = RoutingStrategies.Tunnel | RoutingStrategies.Bubble)
+        //   RoutingStrategies routes = RoutingStrategies.Bubble)
         //   where T : InputElement
         // {
         //   obj.AddHandler<KeyEventArgs>(InputElement.KeyDownEvent, (EventHandler<KeyEventArgs>) ((_, args) => action(obj, args)), routes, false);
@@ -232,7 +229,7 @@ public class MarkupViewExtensionGenerator : ISourceGenerator
           .Line("  this T obj,")
           .Line($"  Action<T, {eventType}> action,")
           .Line(
-            "  RoutingStrategies routes = RoutingStrategies.Tunnel | RoutingStrategies.Bubble)")
+            "  RoutingStrategies routes = RoutingStrategies.Bubble)")
           .Line("  where T : " + className)
           .CodeBlock(() =>
           {
@@ -253,7 +250,7 @@ public class MarkupViewExtensionGenerator : ISourceGenerator
         // public static T OnKeyDown<T>(
         //   this T obj,
         //   Action<T, IObservable<KeyEventArgs>> handler,
-        //   RoutingStrategies routes = RoutingStrategies.Tunnel | RoutingStrategies.Bubble)
+        //   RoutingStrategies routes = RoutingStrategies.Bubble)
         //   where T : InputElement
         // {
         //   IObservable<KeyEventArgs> observable = obj.GetObservable<KeyEventArgs>(InputElement.KeyDownEvent, routes);
@@ -278,7 +275,7 @@ public class MarkupViewExtensionGenerator : ISourceGenerator
           .Line("  this T obj,")
           .Line($"  Action<T, IObservable<{eventType}>> handler,")
           .Line(
-            "  RoutingStrategies routes = RoutingStrategies.Tunnel | RoutingStrategies.Bubble)")
+            "  RoutingStrategies routes = RoutingStrategies.Bubble)")
           .Line("  where T : " + className)
           .CodeBlock(() =>
           {
@@ -297,7 +294,7 @@ public class MarkupViewExtensionGenerator : ISourceGenerator
         // /// <returns>An observable for the event.</returns>
         // public static IObservable<KeyEventArgs> ObserveOnKeyDown(
         //   this InputElement obj,
-        //   RoutingStrategies routes = RoutingStrategies.Tunnel | RoutingStrategies.Bubble)
+        //   RoutingStrategies routes = RoutingStrategies.Bubble)
         // {
         //   return obj.GetObservable<KeyEventArgs>(InputElement.KeyDownEvent, routes);
         // }
@@ -314,7 +311,7 @@ public class MarkupViewExtensionGenerator : ISourceGenerator
           .Line($"public static IObservable<{eventType}> ObserveOn{eventName}(")
           .Line($"  this {className} obj,")
           .Line(
-            "  RoutingStrategies routes = RoutingStrategies.Tunnel | RoutingStrategies.Bubble)")
+            "  RoutingStrategies routes = RoutingStrategies.Bubble)")
           .CodeBlock(() =>
           {
             sb.Line(

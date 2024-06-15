@@ -1,4 +1,3 @@
-using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -14,8 +13,8 @@ public class FieldSpec(
 
   public void Deconstruct(out string[] modifiers, out TypeSpec type)
   {
-    modifiers = this.Modifiers;
-    type = this.Type;
+    modifiers = Modifiers;
+    type = Type;
   }
 }
 
@@ -26,21 +25,18 @@ public class TypeSpec(bool isGenericType, string genericTypeName)
 
   public void Deconstruct(out bool isGenericType, out string genericTypeName)
   {
-    isGenericType = this.IsGenericType;
-    genericTypeName = this.GenericTypeName;
+    isGenericType = IsGenericType;
+    genericTypeName = GenericTypeName;
   }
 }
 
 public class ClassSpec(
-  string[] interfaces
+  string[] interfaces,
+  bool isAbstract
 )
 {
   public string[] Interfaces { get; } = interfaces;
-
-  public void Deconstruct(out string[] interfaces)
-  {
-    interfaces = this.Interfaces;
-  }
+  public bool IsAbstract { get; } = isAbstract;
 }
 
 public static class ClassDeclarationSyntaxExtensions
@@ -114,7 +110,8 @@ public static class CompilationExtensions
         var model = compilation.GetSemanticModel(s.SyntaxTree);
         var symbol = model.GetDeclaredSymbol(s);
         return symbol is INamedTypeSymbol cs &&
-               cs.ImplementsInterfaces(classSpec.Interfaces);
+               cs.ImplementsInterfaces(classSpec.Interfaces) &&
+               cs.IsAbstract == classSpec.IsAbstract;
       });
   }
 }

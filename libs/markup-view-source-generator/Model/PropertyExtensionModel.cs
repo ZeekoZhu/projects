@@ -11,13 +11,6 @@ public class PropertyExtensionModel(
   public string ClassName { get; } = className;
   public string NamespaceName { get; } = namespaceName;
   public List<PropertyModel> Properties { get; } = properties;
-
-  public void Deconstruct(out string className, out string namespaceName, out List<PropertyModel> properties)
-  {
-    className = ClassName;
-    namespaceName = NamespaceName;
-    properties = Properties;
-  }
 }
 
 public class PropertyModel(
@@ -39,7 +32,7 @@ public class PropertyExtensionModelCollector
   public IEnumerable<PropertyExtensionModel> Collect(
     GeneratorExecutionContext context)
   {
-    return context.Compilation.GetClasses(new ClassSpec(["IMarkupView"]))
+    return context.Compilation.GetClasses(new ClassSpec(["IMarkupView"], false))
       .Select(c =>
       {
         var model = context.Compilation.GetSemanticModel(c.SyntaxTree);
@@ -76,11 +69,12 @@ public class EventExtensionModel(
   public string NamespaceName { get; } = namespaceName;
   public List<EventModel> Events { get; } = events;
 
-  public void Deconstruct(out string className, out string namespaceName, out List<EventModel> events)
+  public void Deconstruct(out string className, out string namespaceName,
+    out List<EventModel> events)
   {
-    className = this.ClassName;
-    namespaceName = this.NamespaceName;
-    events = this.Events;
+    className = ClassName;
+    namespaceName = NamespaceName;
+    events = Events;
   }
 }
 
@@ -93,8 +87,8 @@ public class EventModel(
 
   public void Deconstruct(out string eventName, out string eventTypeName)
   {
-    eventName = this.EventName;
-    eventTypeName = this.EventTypeName;
+    eventName = EventName;
+    eventTypeName = EventTypeName;
   }
 }
 
@@ -103,7 +97,7 @@ public class EventExtensionModelCollector
   public IEnumerable<EventExtensionModel> Collect(
     GeneratorExecutionContext context)
   {
-    return context.Compilation.GetClasses(new ClassSpec(["IMarkupView"]))
+    return context.Compilation.GetClasses(new ClassSpec(["IMarkupView"], false))
       .Select(c =>
       {
         var model = context.Compilation.GetSemanticModel(c.SyntaxTree);
@@ -120,7 +114,9 @@ public class EventExtensionModelCollector
             field.Declaration.Variables[0]
               .Identifier.ToString()
               .Replace("Event", "");
-          var propType = field.Declaration.Type is GenericNameSyntax gns ? gns.TypeArgumentList.Arguments[0].ToString() : "";
+          var propType = field.Declaration.Type is GenericNameSyntax gns
+            ? gns.TypeArgumentList.Arguments[0].ToString()
+            : "";
           result.Events.Add(new EventModel(propName, propType));
         }
 
