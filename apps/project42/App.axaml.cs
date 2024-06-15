@@ -1,6 +1,6 @@
 using Projects.AvaloniaUtils.HotReload;
 using Splat;
-using static Projects.Project42.CustomLabelBuilder;
+using static Projects.Project42.DashboardCanvasViewBuilder;
 
 
 namespace Projects.Project42;
@@ -24,17 +24,7 @@ public class App : Application, IEnableLogger
       .Content(
         StackPanel()
           .Children(
-            Label()
-              .Content("Hello, world! Welcome to hotreload world!")
-              .Foreground(Brushes.DodgerBlue),
-            Button()
-              .Content("Counter")
-              .OnClick(
-                (_, o) => o.Subscribe(_ =>
-                  _counter.OnNext(
-                    _counter.Value + 1))),
-             CustomLabel()
-              .Text(_counter.Select(c => $"Counter: {c}"))
+            DashboardCanvasView()
           )
       );
   }

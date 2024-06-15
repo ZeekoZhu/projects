@@ -52,10 +52,6 @@ public class CustomLabel : ReactiveUserControl<CustomLabelViewModel>,
   }
 }
 
-public class ViewModelBase : ReactiveObject, IEnableLocator
-{
-}
-
 public class CustomLabelViewModel : ViewModelBase
 {
   public CustomLabelViewModel()
