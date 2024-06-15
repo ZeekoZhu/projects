@@ -1,10 +1,11 @@
 using Splat;
+using Window = Avalonia.Controls.Window;
 
 namespace Projects.AvaloniaUtils.HotReload;
 
 /// <summary>
-/// A hot reload window under development.
-/// Press Ctrl + R to reload the view.
+///   A hot reload window under development.
+///   Press Ctrl + R to reload the view.
 /// </summary>
 public class HotReloadWindow : Window, IEnableLogger
 {
@@ -16,11 +17,20 @@ public class HotReloadWindow : Window, IEnableLogger
   {
     _contentRender = contentRender;
     _contentRender(this);
+    if (!IsProduction()) this.AttachDevTools();
+
+    if (IsHotReloadEnabled())
+      this.AddDisposableHandler(KeyDownEvent, (sender, args) =>
+      {
+        if (!_hotReloadGesture.Matches(args)) return;
+        _contentRender(this);
+        this.Log().Info("Refreshed view.");
+      });
   }
 
   /// <summary>
-  /// Set the hot reload gesture.
-  /// The default is Ctrl + R.
+  ///   Set the hot reload gesture.
+  ///   The default is Ctrl + R.
   /// </summary>
   /// <param name="gesture"></param>
   /// <returns></returns>
@@ -43,17 +53,5 @@ public class HotReloadWindow : Window, IEnableLogger
   public bool IsHotReloadEnabled()
   {
     return !IsProduction() && !Debugger.IsAttached;
-  }
-
-  protected override void OnKeyDown(KeyEventArgs e)
-  {
-    if (IsHotReloadEnabled())
-      if (_hotReloadGesture.Matches(e))
-      {
-        _contentRender(this);
-        this.Log().Info("Refreshed view.");
-      }
-
-    base.OnKeyDown(e);
   }
 }
