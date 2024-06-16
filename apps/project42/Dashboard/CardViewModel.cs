@@ -1,9 +1,16 @@
 using System.Reactive;
 using Projects.AvaloniaUtils;
+using Projects.Project42.Extensions;
 using ReactiveUI;
 using Splat;
 
 namespace Projects.Project42.Dashboard;
+
+public static class DashboardCanvasConstants
+{
+  public static readonly Size CardSize = new(300, 200);
+  public static readonly Size CanvasSize = new(1920, 1080);
+}
 
 public class CardViewModel : IEnableLogger, IEnableLocator
 {
@@ -15,19 +22,16 @@ public class CardViewModel : IEnableLogger, IEnableLocator
     Left
   }
 
+
   public CardViewModel()
   {
     MoveCard = ReactiveCommand.Create((Point p) =>
     {
-      Position.SetState(prev => new Point(
-        LimitPosition(prev.X + p.X, 1920 - 300),
-        LimitPosition(prev.Y + p.Y, 1080 - 200)));
-      return;
-
-      double LimitPosition(double value, double max)
-      {
-        return Math.Max(Math.Min(value, max), 0);
-      }
+      Position.SetState(prev =>
+        (prev + p)
+        .Constraint(new Point(0, 0),
+          (DashboardCanvasConstants.CanvasSize -
+           DashboardCanvasConstants.CardSize).ToPoint()));
     });
 
     MoveCardDirection = ReactiveCommand.CreateFromObservable(
