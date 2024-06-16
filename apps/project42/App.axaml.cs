@@ -1,6 +1,6 @@
 using Projects.AvaloniaUtils.HotReload;
 using Splat;
-using static Projects.Project42.DashboardCanvasViewBuilder;
+using static Projects.Project42.Dashboard.DashboardCanvasViewBuilder;
 
 
 namespace Projects.Project42;
