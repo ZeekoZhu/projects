@@ -1,5 +1,7 @@
-using System.Linq;
 using System.Reactive;
+using DynamicData;
+using DynamicData.Binding;
+using Projects.Project42.Extensions;
 using ReactiveUI;
 using Splat;
 using ScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility;
@@ -15,22 +17,31 @@ public class
   {
     ViewModel = new DashboardCanvasViewModel();
     Debug.Assert(_canvas != null, nameof(_canvas) + " != null");
-    ViewModel.State.Current.Cards.CollectionChanged += (_, _) =>
+    this.WhenActivated(d =>
     {
-      UpdateCanvasCards();
-    };
-    UpdateCanvasCards();
+      UpdateCanvasCards()
+        .DisposeWith(d);
+    });
   }
 
-  private void UpdateCanvasCards()
+  private IDisposable UpdateCanvasCards()
   {
     Debug.Assert(ViewModel != null, nameof(ViewModel) + " != null");
-    var cardControls = ViewModel.State.Current.Cards
-      .Select(it => new DashboardStringCardViewModel(it))
-      .Select(GetCardView);
-
-    _canvas.Children.Clear();
-    _canvas.Children.AddRange(cardControls);
+    var list = _canvas.Children;
+    list.ObserveCollectionChanges()
+      .Subscribe(
+        _ =>
+        {
+          for (var i = 0; i < list.Count; i++)
+          {
+            var ctrl = list[i];
+            ctrl.ZIndex(i);
+          }
+        }
+      );
+    return ViewModel.Cards.Connect()
+      .Transform(GetCardView)
+      .ApplyChangesTo(list);
   }
 
   private Control GetCardView(ViewModelBase vm)
@@ -46,9 +57,17 @@ public class
     };
   }
 
+  private void BringCardToTopOnClickCard()
+  {
+    Debug.Assert(ViewModel != null, nameof(ViewModel) + " != null");
+    this.GetObservable(DashboardStringCardView.CardClickEvent)
+      .Select(ev => ev.CardViewModel)
+      .InvokeCommand(ViewModel.BringToTop);
+  }
+
   public override void View()
   {
-
+    BringCardToTopOnClickCard();
     this.Content(
       Panel()
         .Children(
@@ -60,7 +79,6 @@ public class
                 .Width(1920)
                 .Height(1080)
                 .Background(Brushes.Gainsboro)
-
             )
         )
     );
@@ -69,22 +87,50 @@ public class
 
 public class DashboardCanvasViewModel : ViewModelBase
 {
-  public Stateful<StateType> State { get; } = new(
-    new StateType(["Hello"]));
+  public readonly SourceList<DashboardStringCardViewModel> Cards = new();
 
+  public DashboardCanvasViewModel()
+  {
+    Cards.AddRange([
+      new DashboardStringCardViewModel("Hello"),
+      new DashboardStringCardViewModel("World")
+    ]);
 
-  public record StateType(ObservableCollection<string> Cards);
+    BringToTop = ReactiveCommand.Create((DashboardStringCardViewModel card) =>
+    {
+      Cards.Edit(list =>
+      {
+        this.Log()
+          .Debug("Bring card to top: {card}", card.Stateful.Current.Text);
+        var index = list.IndexOf(card);
+        list.Move(index, list.Count - 1);
+      });
+    });
+  }
+
+  public ReactiveCommand<DashboardStringCardViewModel, Unit> BringToTop { get; }
 }
 
 public class DashboardStringCardView :
   MarkupViewBase<DashboardStringCardViewModel>
 {
+  public static readonly RoutedEvent<CardClickEventArgs> CardClickEvent =
+    RoutedEvent.Register<DashboardStringCardView, CardClickEventArgs>(
+      nameof(CardClick), RoutingStrategies.Bubble);
+
+  public event EventHandler<CardClickEventArgs> CardClick
+  {
+    add => AddHandler(CardClickEvent, value);
+    remove => RemoveHandler(CardClickEvent, value);
+  }
+
   public override void View()
   {
     Debug.Assert(ViewModel != null, nameof(ViewModel) + " != null");
     MoveCardOnArrowKeyDown();
     MoveCardOnDrag();
     FocusCardOnClick();
+    EmitCardClickOnClick();
 
     this
       .Focusable(true)
@@ -106,6 +152,17 @@ public class DashboardStringCardView :
                   .Text(ViewModel.Stateful.Select(it => it.Text))
               )
           ));
+  }
+
+  private void EmitCardClickOnClick()
+  {
+    this.ObserveOnPointerPressed(RoutingStrategies.Bubble)
+      .Subscribe(_ =>
+      {
+        Debug.Assert(ViewModel != null, nameof(ViewModel) + " != null");
+        RaiseEvent(new CardClickEventArgs(ViewModel)
+          { RoutedEvent = CardClickEvent, Source = this });
+      });
   }
 
   private void FocusCardOnClick()
@@ -155,6 +212,12 @@ public class DashboardStringCardView :
           })
       )
       .InvokeCommand(ViewModel, vm => vm.MoveCard);
+  }
+
+  public class CardClickEventArgs(DashboardStringCardViewModel cardViewModel)
+    : RoutedEventArgs
+  {
+    public DashboardStringCardViewModel CardViewModel { get; } = cardViewModel;
   }
 }
 
