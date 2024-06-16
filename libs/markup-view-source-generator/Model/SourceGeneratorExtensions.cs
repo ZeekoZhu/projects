@@ -133,4 +133,20 @@ public static class SymbolExtensions
       }
     }
   }
+
+  public static string FullContainingTypeName(this ISymbol symbol)
+  {
+    return string.Join(".",
+      Parts(symbol).Where(it => !string.IsNullOrEmpty(it)).Reverse());
+
+    IEnumerable<string> Parts(ISymbol s)
+    {
+      var c = s.ContainingType;
+      while (c is not null)
+      {
+        yield return c.Name;
+        c = c.ContainingType;
+      }
+    }
+  }
 }
