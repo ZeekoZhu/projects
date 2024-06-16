@@ -20,9 +20,10 @@ public class App : Application, IEnableLogger
     return window
       .Width(400)
       .Height(300)
+      .WindowStartupLocation(WindowStartupLocation.CenterScreen)
       .Title("project 42")
       .Content(
-        StackPanel()
+        Panel()
           .Children(
             DashboardCanvasView()
           )

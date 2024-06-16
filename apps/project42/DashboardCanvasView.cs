@@ -48,15 +48,20 @@ public class
 
   public override void View()
   {
+
     this.Content(
-      ScrollViewer()
-        .HorizontalScrollBarVisibility(ScrollBarVisibility.Auto)
-        .VerticalScrollBarVisibility(ScrollBarVisibility.Auto)
-        .Content(
-          Canvas(out _canvas)
-            .Width(1920)
-            .Height(1080)
-            .Background(Brushes.Gainsboro)
+      Panel()
+        .Children(
+          ScrollViewer()
+            .HorizontalScrollBarVisibility(ScrollBarVisibility.Auto)
+            .VerticalScrollBarVisibility(ScrollBarVisibility.Auto)
+            .Content(
+              Canvas(out _canvas)
+                .Width(1920)
+                .Height(1080)
+                .Background(Brushes.Gainsboro)
+
+            )
         )
     );
   }
@@ -113,7 +118,7 @@ public class DashboardStringCardView :
   {
     Debug.Assert(ViewModel != null, nameof(ViewModel) + " != null");
     this.ObserveOnKeyDown(RoutingStrategies.Bubble)
-      .Log(this, "Keydown", it=>it.Key.ToString())
+      .Log(this, "Keydown", it => it.Key.ToString())
       .Where(ev => ev.Key is Key.Up or Key.Right or Key.Down or Key.Left)
       .Select(ev =>
       {
@@ -135,7 +140,7 @@ public class DashboardStringCardView :
     this.ObserveOnPointerPressed(RoutingStrategies.Bubble)
       .SelectMany(_ =>
         this.ObserveOnPointerMoved()
-          .Select(it=>it.GetPosition(this.GetVisualParent<Canvas>()))
+          .Select(it => it.GetPosition(this.GetVisualParent<Canvas>()))
           .TakeUntil(this.ObserveOnPointerReleased())
           .Buffer(2, 1)
           .Where(points => points.Count > 1)
@@ -149,12 +154,20 @@ public class DashboardStringCardView :
             return new Point(deltaX, deltaY);
           })
       )
-      .InvokeCommand(ViewModel, vm=>vm.MoveCard);
+      .InvokeCommand(ViewModel, vm => vm.MoveCard);
   }
 }
 
 public class DashboardStringCardViewModel : ViewModelBase
 {
+  public enum MovementDirection
+  {
+    Up,
+    Right,
+    Down,
+    Left
+  }
+
   public DashboardStringCardViewModel(string text)
   {
     Stateful = new Stateful<State>(new State(text));
@@ -188,15 +201,8 @@ public class DashboardStringCardViewModel : ViewModelBase
   }
 
   public ReactiveCommand<Point, Unit> MoveCard { get; }
-  public enum MovementDirection
-  {
-    Up,
-    Right,
-    Down,
-    Left
-  }
 
-  public ReactiveCommand<MovementDirection,Unit> MoveCardDirection { get; }
+  public ReactiveCommand<MovementDirection, Unit> MoveCardDirection { get; }
 
   public Stateful<Point> Position { get; } = new(new Point(0, 0));
   public Stateful<State> Stateful { get; }
