@@ -11,11 +11,10 @@ public interface IDashboardCardViewModel
 public static class CardViewExtensions
 {
   public static IDisposable SetupCardBehaviors<T>(
-    this ReactiveUserControl<T> control)
+    this ReactiveUserControl<T> control, IDashboardCardViewModel vm)
     where T : class, IDashboardCardViewModel
   {
-    Debug.Assert(control.ViewModel != null, "control.ViewModel != null");
-    var card = control.ViewModel.CardViewModel;
+    var card = vm.CardViewModel;
     var d = new CompositeDisposable();
 
     // move card on drag
@@ -57,6 +56,14 @@ public static class CardViewExtensions
       .InvokeCommand(card.MoveCardDirection)
       .DisposeWith(d);
 
+    //
+    control.ObserveOnPointerPressed(RoutingStrategies.Bubble)
+      .Subscribe(_ =>
+      {
+        control.Focus();
+        DashboardCanvasEvents.RaiseCardFocused(control, vm);
+      }).DisposeWith(d);
     return d;
   }
+
 }

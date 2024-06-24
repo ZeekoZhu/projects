@@ -8,17 +8,19 @@ namespace Projects.Project42;
 
 public class ViewModelBase : ReactiveObject, IEnableLocator;
 
-public abstract class MarkupViewBase<T> : ReactiveUserControl<T>, IEnableLogger, IMarkupView
+public abstract class MarkupViewBase<T> : ReactiveUserControl<T>, IEnableLogger, IMarkupView, IEnableLocator
   where T : class
 {
+  protected T Model => ViewModel ?? throw new InvalidOperationException("ViewModel is null");
   protected MarkupViewBase()
   {
+    var logger = this.GetService<ILogManager>().GetLogger(typeof(T));
     this.GetObservable(ViewModelProperty)
       .Where(vm => vm is not null)
       .Take(1)
       .Subscribe(_ =>
       {
-        this.Log().Debug("ViewModel set");
+        logger.Debug("ViewModel set");
         View();
       });
   }
