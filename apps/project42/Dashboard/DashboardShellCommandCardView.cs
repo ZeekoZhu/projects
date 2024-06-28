@@ -6,7 +6,6 @@ using CliWrap;
 using DynamicData;
 using ReactiveUI;
 using Splat;
-using ScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility;
 
 namespace Projects.Project42.Dashboard;
 
@@ -51,7 +50,18 @@ public class DashboardShellCommandCardView :
                     Button()
                       .Content(runningButtonText)
                       .IsEnabled(Model.ExecuteCommand.CanExecute)
-                      .Command(Model.ExecuteCommand)
+                      .Command(Model.ExecuteCommand),
+                    Button()
+                      .Width(32)
+                      .Height(32)
+                      .Content(
+                        PathIcon()
+                          .Width(16)
+                          .Height(16)
+                          .Data(Resources
+                            .GetResourceObservable("IconSettingsRegular")
+                            .ToBinding())
+                      )
                   ),
 
                 // title
