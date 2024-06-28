@@ -55,6 +55,10 @@ public class
       {
         ViewModel = m
       },
+      DashboardShellCommandCardViewModel m => new DashboardShellCommandCardView
+      {
+        ViewModel = m
+      },
       _ => throw new InvalidOperationException(
         $"Unknown ViewModel type: {vm.GetType().FullName}")
     };
@@ -96,7 +100,8 @@ public class DashboardCanvasViewModel : ViewModelBase
   {
     Cards.AddRange([
       new DashboardCommentCardViewModel(),
-      new DashboardStringCardViewModel("Hello")
+      new DashboardStringCardViewModel("Hello"),
+      new DashboardShellCommandCardViewModel()
     ]);
 
     BringToTop = ReactiveCommand.Create((IDashboardCardViewModel card) =>
