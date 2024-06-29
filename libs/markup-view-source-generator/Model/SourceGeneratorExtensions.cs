@@ -22,12 +22,6 @@ public class TypeSpec(bool isGenericType, string genericTypeName)
 {
   public bool IsGenericType { get; } = isGenericType;
   public string GenericTypeName { get; } = genericTypeName;
-
-  public void Deconstruct(out bool isGenericType, out string genericTypeName)
-  {
-    isGenericType = IsGenericType;
-    genericTypeName = GenericTypeName;
-  }
 }
 
 public class ClassSpec(
@@ -148,5 +142,10 @@ public static class SymbolExtensions
         c = c.ContainingType;
       }
     }
+  }
+
+  public static string FullQualifiedName(this ISymbol symbol)
+  {
+    return symbol.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
   }
 }

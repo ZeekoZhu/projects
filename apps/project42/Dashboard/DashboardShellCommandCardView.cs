@@ -1,11 +1,12 @@
 using System.Reactive;
-using System.Text;
 using System.Threading.Tasks;
 using AvaloniaEdit;
 using CliWrap;
 using DynamicData;
 using ReactiveUI;
 using Splat;
+using FluentAvalonia.UI.Controls;
+using static FluentAvalonia.UI.Controls.MarkupBuilder;
 
 namespace Projects.Project42.Dashboard;
 
@@ -55,12 +56,10 @@ public class DashboardShellCommandCardView :
                       .Width(32)
                       .Height(32)
                       .Content(
-                        PathIcon()
+                        SymbolIcon()
                           .Width(16)
                           .Height(16)
-                          .Data(Resources
-                            .GetResourceObservable("IconSettingsRegular")
-                            .ToBinding())
+                          .Symbol(Symbol.Settings)
                       )
                   ),
 
