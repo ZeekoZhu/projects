@@ -6,27 +6,54 @@ using DynamicData;
 using ReactiveUI;
 using Splat;
 using FluentAvalonia.UI.Controls;
+using Projects.Project42.Extensions;
 using static FluentAvalonia.UI.Controls.MarkupBuilder;
+using Button = Avalonia.Controls.Button;
 
 namespace Projects.Project42.Dashboard;
 
 public class DashboardShellCommandCardView :
   MarkupViewBase<DashboardShellCommandCardViewModel>
 {
+  private TextEditor? _outputPreview;
+
   public DashboardShellCommandCardView()
   {
-    this.WhenActivated(d => { this.SetupCardBehaviors(Model).DisposeWith(d); });
+    this.WhenActivated(d =>
+    {
+      this.SetupCardBehaviors(Model).DisposeWith(d);
+      if (_outputPreview != null)
+        BindTextEditorContent(_outputPreview).DisposeWith(d);
+    });
   }
 
   public override void View()
   {
+    #region Styles
+
+    var classNames = new
+    {
+      ToolButton = "tool-button"
+    };
+    IStyle[] styles =
+    [
+      Style(x => x.OfType<Button>().Class(classNames.ToolButton))
+        .Setter(WidthProperty, 32d)
+        .Setter(HeightProperty, 32d)
+        .Nested(Style(x => x.Nesting().OfType<SymbolIcon>())
+          .Setter(WidthProperty, 16d)
+          .Setter(HeightProperty, 16d))
+    ];
+
+    #endregion
+
     var runningButtonText = Model.ProcessState.Select(it => it switch
     {
-      CommandRunningState.Idle => "Run",
-      CommandRunningState.Running => "Running...",
-      CommandRunningState.Success => "Success",
-      CommandRunningState.Error => "Error",
-      _ => "Unknown"
+      CommandRunningState.Idle => Symbol.Play,
+      CommandRunningState.Running => Symbol.Stop,
+      CommandRunningState.Success => Symbol.Play,
+      CommandRunningState.Error => Symbol.Play,
+      _ => Symbol.Play
     });
     this
       .Focusable(true)
@@ -35,6 +62,7 @@ public class DashboardShellCommandCardView :
       .Height(DashboardCanvasConstants.CardSize.Height)
       .Left(Model.CardViewModel.Position.Select(it => it.X))
       .Top(Model.CardViewModel.Position.Select(it => it.Y))
+      .Styles(styles)
       .Content(
         Border()
           .BorderBrush(Brushes.Black)
@@ -48,17 +76,29 @@ public class DashboardShellCommandCardView :
                 StackPanel()
                   .DockRight()
                   .Children(
+                    // run button
                     Button()
-                      .Content(runningButtonText)
-                      .IsEnabled(Model.ExecuteCommand.CanExecute)
-                      .Command(Model.ExecuteCommand),
-                    Button()
-                      .Width(32)
-                      .Height(32)
+                      .Classes(classNames.ToolButton)
                       .Content(
                         SymbolIcon()
-                          .Width(16)
-                          .Height(16)
+                          .Symbol(runningButtonText)
+                      )
+                      .IsEnabled(Model.ExecuteCommand.CanExecute)
+                      .Command(Model.ExecuteCommand),
+                    // reset button
+                    Button()
+                      .Classes(classNames.ToolButton)
+                      .Content(
+                        SymbolIcon()
+                          .Symbol(Symbol.Refresh)
+                      )
+                      .IsEnabled(Model.Reset.CanExecute)
+                      .Command(Model.Reset),
+                    // config button
+                    Button()
+                      .Classes(classNames.ToolButton)
+                      .Content(
+                        SymbolIcon()
                           .Symbol(Symbol.Settings)
                       )
                   ),
@@ -76,14 +116,12 @@ public class DashboardShellCommandCardView :
                   .BorderThickness(1)
                   .Child(
                     new TextEditor()
-                      .Ref(out var outputPreview)
+                      .Ref(out _outputPreview)
                       .DockBottom()
                   )
               )
           )
       );
-
-    BindTextEditorContent(outputPreview);
   }
 
   private IDisposable BindTextEditorContent(TextEditor outputPreview)
@@ -130,6 +168,7 @@ public class DashboardShellCommandCardViewModel :
   public SourceList<string> OutputLines { get; } = new();
 
   public ReactiveCommand<Unit, Unit> ExecuteCommand { get; }
+  public ReactiveCommand<Unit, Unit> Reset { get; }
 
   public DashboardShellCommandCardViewModel()
   {
@@ -141,6 +180,13 @@ public class DashboardShellCommandCardViewModel :
           !string.IsNullOrWhiteSpace(cmd));
     ExecuteCommand =
       ReactiveCommand.CreateFromTask(ExecuteCommandAsync, canExecute);
+
+    Reset = ReactiveCommand.Create(() =>
+    {
+      ProcessState.SetState(CommandRunningState.Idle);
+      OutputLines.Clear();
+    }, ProcessState.Select(it =>
+      it is CommandRunningState.Success or CommandRunningState.Error));
   }
 
   private async Task ExecuteCommandAsync()

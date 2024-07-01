@@ -57,7 +57,7 @@ public static class CardViewExtensions
       .DisposeWith(d);
 
     //
-    control.ObserveOnPointerPressed(RoutingStrategies.Bubble)
+    control.ObserveOnPointerPressed(RoutingStrategies.Tunnel)
       .Subscribe(_ =>
       {
         control.Focus();

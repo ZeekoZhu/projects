@@ -9,10 +9,7 @@ public class DashboardCommentCardView :
 {
   public DashboardCommentCardView()
   {
-    this.WhenActivated(d =>
-    {
-      this.SetupCardBehaviors(Model).DisposeWith(d);
-    });
+    this.WhenActivated(d => { this.SetupCardBehaviors(Model).DisposeWith(d); });
   }
 
   public override void View()
@@ -36,6 +33,8 @@ public class DashboardCommentCardView :
             StackPanel()
               .Children(
                 TextBox()
+                  .OnPointerPressedHandler((_, _) =>
+                    DashboardCanvasEvents.RaiseCardFocused(this, Model))
                   .Text(ViewModel.Comment.Binding(BindingMode.TwoWay))
               )
           )
