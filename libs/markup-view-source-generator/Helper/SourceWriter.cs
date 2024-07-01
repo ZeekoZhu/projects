@@ -45,6 +45,17 @@ public class SourceWriter(string indentString = "  ")
     return this;
   }
 
+  public SourceWriter Lines(string linesContent)
+  {
+    var lines = linesContent.Trim('\n').Split('\n');
+    foreach (var line in lines)
+    {
+      Line(line);
+    }
+
+    return this;
+  }
+
   public SourceWriter Line(string value)
   {
     foreach (var s in Enumerable.Repeat(indentString, _indentLevel))

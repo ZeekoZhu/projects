@@ -1,5 +1,4 @@
 using LanguageExt;
-using LanguageExt.SomeHelp;
 using Microsoft.CodeAnalysis;
 using Projects.MarkupViewSourceGenerator.Model;
 
@@ -21,6 +20,19 @@ public class ControlInfoExtractor
       .Somes()
       .ToList();
 
+    var avaloniaEvents = controlClass.GetMembers()
+      .OfType<IFieldSymbol>()
+      .Filter(IsAvaloniaEvent)
+      .Map(ev => GetAvaloniaEventArgsType(ev.Type)
+        .Map(argType => new ControlEventInfo
+        {
+          Type = argType.FullQualifiedName(),
+          EventFiledName = ev.Name,
+        })
+      )
+      .Somes()
+      .ToList();
+
     return new ControlInfo
     {
       HasDefaultCtor =
@@ -31,7 +43,8 @@ public class ControlInfoExtractor
       DeclaringType = controlClass.FullContainingTypeName(),
       ControlName = controlClass.Name,
       ControlClassName = controlClass.FullQualifiedName(),
-      Properties = avaloniaProps
+      Properties = avaloniaProps,
+      Events = avaloniaEvents
     };
   }
 
@@ -63,6 +76,28 @@ public class ControlInfoExtractor
     return genericTypeDefinition is "Avalonia.AvaloniaProperty<>"
       or "Avalonia.StyledProperty<>"
       or "Avalonia.DirectProperty<,>";
+  }
+
+  private static bool IsAvaloniaEvent(IFieldSymbol field)
+  {
+    if (!field.IsStatic) return false;
+    if (field.DeclaredAccessibility is not Accessibility.Public) return false;
+
+    var type = field.Type;
+
+    if (type is not INamedTypeSymbol { IsGenericType: true } namedType)
+      return false;
+    var genericTypeDef = namedType.ConstructUnboundGenericType().ToString();
+
+    return genericTypeDef is "Avalonia.Interactivity.RoutedEvent<>";
+  }
+
+  public static Option<ITypeSymbol> GetAvaloniaEventArgsType(
+    ITypeSymbol fieldType)
+  {
+    if (fieldType is not INamedTypeSymbol { IsGenericType: true } namedType)
+      return null;
+    return namedType.TypeArguments.LastOrDefault().Apply(Prelude.Optional);
   }
 
 
