@@ -7,18 +7,17 @@ public interface ISignal : INotifyPropertyChanged
   /// <summary>
   ///  Value of the signal.
   /// </summary>
-  object Value { get; }
+  object Get();
 }
 
 public interface ISignal<out T> : ISignal, IObservable<T>
 {
-  new T Value { get; }
+  T Value { get; }
+  T Get();
 }
 
-internal interface INotifyable
+public interface IWritableSignal<T> : ISignal<T>
 {
-  /// <summary>
-  /// Notify that the value has changed.
-  /// </summary>
-  void NotifyChanged();
+  new T Value { get; set; }
+  void Set(T value);
 }

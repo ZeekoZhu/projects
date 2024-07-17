@@ -39,7 +39,15 @@ public class Computed<T> : ISignal<T>, IDisposable
   }
 
   public event PropertyChangedEventHandler? PropertyChanged;
-  object ISignal.Value => Value!;
+  object ISignal.Get()
+  {
+    return Get()!;
+  }
+
+  public T Get()
+  {
+    return Value;
+  }
 
   public T Value => ComputedValue;
 
