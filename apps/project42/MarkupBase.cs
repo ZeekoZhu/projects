@@ -42,6 +42,9 @@ public abstract class MarkupWindowBase<T> : ReactiveWindow<T>, IEnableLogger,
 
   protected readonly IFullLogger Logger;
 
+  protected T Model => ViewModel ??
+                       throw new InvalidOperationException("ViewModel is null");
+
   private readonly KeyGesture _hotReloadGesture =
     new(Key.R, KeyModifiers.Control);
 
@@ -57,6 +60,10 @@ public abstract class MarkupWindowBase<T> : ReactiveWindow<T>, IEnableLogger,
       .Where(vm => vm is not null)
       .Take(1)
       .Subscribe(_ => { View(); });
+    if (!IsProduction())
+    {
+      this.AttachDevTools();
+    }
     if (IsHotReloadEnabled())
     {
       this.ObserveOnKeyDown(RoutingStrategies.Tunnel)

@@ -7,6 +7,7 @@ using ReactiveUI;
 using Splat;
 using FluentAvalonia.UI.Controls;
 using Projects.Project42.Extensions;
+using ReactiveUI.Fody.Helpers;
 using static FluentAvalonia.UI.Controls.MarkupBuilder;
 using Button = Avalonia.Controls.Button;
 
@@ -16,9 +17,15 @@ public class DashboardShellCommandCardView :
   MarkupViewBase<DashboardShellCommandCardViewModel>
 {
   private TextEditor? _outputPreview;
+  private ReactiveCommand<Unit, Unit> OpenConfigWindow { get; }
 
   public DashboardShellCommandCardView()
   {
+    OpenConfigWindow = ReactiveCommand.Create(() =>
+    {
+      var window = new ShellCommandConfigWindow(Model.CommandConfig.Current);
+      window.ShowDialog(VisualRoot as Window ?? throw new InvalidOperationException("VisualRoot is null"));
+    });
     this.WhenActivated(d =>
     {
       this.SetupCardBehaviors(Model).DisposeWith(d);
@@ -97,6 +104,7 @@ public class DashboardShellCommandCardView :
                     // config button
                     Button()
                       .Classes(classNames.ToolButton)
+                      .Command(OpenConfigWindow)
                       .Content(
                         SymbolIcon()
                           .Symbol(Symbol.Settings)
@@ -108,7 +116,7 @@ public class DashboardShellCommandCardView :
                   .DockTop()
                   .Children(
                     TextBlock()
-                      .Text(Model.ShellCommand.Select())),
+                      .Text(Model.CommandConfig.Select(it => it.Name))),
 
                 // output
                 Border()
@@ -155,12 +163,27 @@ public class DashboardShellCommandCardView :
   }
 }
 
+public class ShellCommandConfig
+{
+  public string Shell { get; set; } = "/usr/bin/fish";
+  public string ShellOption { get; set; } = "-c";
+  public string Script { get; set; } = "whoami";
+  public string Name { get; set; } = "";
+
+  public void Deconstruct(out string shell, out string script)
+  {
+    shell = Shell;
+    script = Script;
+  }
+}
+
 public class DashboardShellCommandCardViewModel :
   ViewModelBase, IDashboardCardViewModel
 {
   public CardViewModel CardViewModel { get; } = new();
-  public Stateful<string> ShellCommand { get; } = new("volta --help");
-  public Stateful<string> Shell { get; } = new("fish");
+
+  public Stateful<ShellCommandConfig> CommandConfig { get; } =
+    new(new ShellCommandConfig());
 
   public Stateful<CommandRunningState> ProcessState { get; } =
     new(CommandRunningState.Idle);
@@ -172,12 +195,15 @@ public class DashboardShellCommandCardViewModel :
 
   public DashboardShellCommandCardViewModel()
   {
-    var canExecute = Shell.ToObservable()
-      .CombineLatest(ShellCommand.ToObservable(), ProcessState.ToObservable(),
-        (shell, cmd, processState) =>
-          processState == CommandRunningState.Idle &&
-          !string.IsNullOrWhiteSpace(shell) &&
-          !string.IsNullOrWhiteSpace(cmd));
+    var canExecute = CommandConfig.ToObservable()
+      .CombineLatest(ProcessState.ToObservable(),
+        (scriptConfig, processState) =>
+        {
+          var (shell, script) = scriptConfig;
+          return processState == CommandRunningState.Idle &&
+                 !string.IsNullOrWhiteSpace(shell) &&
+                 !string.IsNullOrWhiteSpace(script);
+        });
     ExecuteCommand =
       ReactiveCommand.CreateFromTask(ExecuteCommandAsync, canExecute);
 
@@ -193,8 +219,9 @@ public class DashboardShellCommandCardViewModel :
   {
     OutputLines.Clear();
 
-    var result = Cli.Wrap(Shell.Current)
-      .WithArguments(["-c", ShellCommand.Current])
+    var commandConfig = CommandConfig.Current;
+    var result = Cli.Wrap(commandConfig.Shell)
+      .WithArguments([commandConfig.ShellOption, commandConfig.Script])
       .WithStandardOutputPipe(
         PipeTarget.ToDelegate(HandleLine))
       .WithStandardErrorPipe(
