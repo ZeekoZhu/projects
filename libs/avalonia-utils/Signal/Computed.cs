@@ -16,7 +16,7 @@ public class Computed<T> : ISignal<T>, IDisposable
     Observable = observable
       .DistinctUntilChanged(Options.Equal.ToEqualityComparer())
       .Replay(1)
-      .RefCount();
+      .RefCount(2);
 
     _computation =
       Observable.SubscribeOn(CurrentThreadScheduler.Instance).Subscribe(OnNext);
@@ -44,11 +44,23 @@ public class Computed<T> : ISignal<T>, IDisposable
     return Get()!;
   }
 
+  /// <summary>
+  /// Get the value of the signal.
+  /// </summary>
+  /// <remarks>
+  /// The computed must be subscribed to before accessing the value.
+  /// </remarks>
   public T Get()
   {
     return Value;
   }
 
+  /// <summary>
+  /// Get the value of the signal.
+  /// </summary>
+  /// <remarks>
+  /// The computed must be subscribed to before accessing the value.
+  /// </remarks>
   public T Value => ComputedValue;
 
   public IDisposable Subscribe(IObserver<T> observer)

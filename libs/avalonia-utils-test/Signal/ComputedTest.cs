@@ -13,6 +13,7 @@ public class ComputedTest
     var state = new State<int>(5);
 
     using var computed = new Computed<int>(state.Select(it => it + 1));
+    using var _ = computed.Observe();
 
     computed.Value.Should().Be(6);
   }
@@ -27,6 +28,7 @@ public class ComputedTest
       from s1 in state1
       from s2 in state2
       select s1 + s2);
+    using var _ = computed.Observe();
 
     computed.Value.Should().Be(11);
   }
@@ -36,6 +38,7 @@ public class ComputedTest
   {
     var state = new State<int>(5);
     using var computed = new Computed<int>(state.Select(it => it + 1));
+    using var _ = computed.Observe();
 
     state.Value = 6;
     computed.Value.Should().Be(7);
@@ -47,6 +50,7 @@ public class ComputedTest
     var state = new State<int>(5);
     using var computed = new Computed<int>(state.Select(it => it + 1));
     using var monitored = computed.Monitor();
+    using var _ = computed.Observe();
 
     state.Value = 6;
     monitored.Should().RaisePropertyChangeFor(x => x.Value);
@@ -58,6 +62,7 @@ public class ComputedTest
     var state = new State<int>(42);
     using var computed = new Computed<int>(state.Select(it => it + 1));
     using var observer = computed.Observe();
+    using var _ = computed.Observe();
 
     observer.RecordedMessages.Should().Equal([43]);
   }
