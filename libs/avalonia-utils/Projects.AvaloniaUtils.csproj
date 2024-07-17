@@ -7,12 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Avalonia" Version="11.0.10" />
-    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.10" />
-    <PackageReference Include="NXUI.Desktop" Version="11.0.10" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
-    <PackageReference Include="Splat" Version="15.1.1" />
-    <PackageReference Include="Splat.Serilog" Version="15.1.1" />
+    <PackageReference Include="Avalonia" Version="11.0.10"/>
+    <PackageReference Include="Avalonia.Diagnostics" Version="11.0.10"/>
+    <PackageReference Include="NXUI.Desktop" Version="11.0.10"/>
+    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1"/>
+    <PackageReference Include="Splat" Version="15.1.1"/>
+    <PackageReference Include="Splat.Serilog" Version="15.1.1"/>
+    <PackageReference Include="LanguageExt.Core" Version="4.4.9"/>
   </ItemGroup>
 
 </Project>
