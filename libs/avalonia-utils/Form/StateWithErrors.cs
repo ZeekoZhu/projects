@@ -8,18 +8,18 @@ public class StateWithErrors<T> : State<T>, INotifyDataErrorInfo
   public StateWithErrors(T value, SignalOptions<T>? options = null) : base(
     value, options)
   {
-    ErrorState.ErrorsChanged += (_, _) =>
+    DataErrors.ErrorsChanged += (_, _) =>
       ErrorsChanged?.Invoke(this,
         new DataErrorsChangedEventArgs(nameof(Value)));
   }
 
-  public ErrorState ErrorState { get; } = new();
+  public DataErrors DataErrors { get; } = new();
 
   public IEnumerable GetErrors(string? propertyName)
   {
-    return ErrorState.GetErrors(propertyName);
+    return DataErrors.GetErrors(propertyName);
   }
 
-  public bool HasErrors => ErrorState.HasErrors;
+  public bool HasErrors => DataErrors.HasErrors;
   public event EventHandler<DataErrorsChangedEventArgs>? ErrorsChanged;
 }

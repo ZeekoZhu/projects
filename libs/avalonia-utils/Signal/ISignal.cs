@@ -13,7 +13,7 @@ public interface ISignal : INotifyPropertyChanged
 public interface ISignal<out T> : ISignal, IObservable<T>
 {
   T Value { get; }
-  T Get();
+  new T Get();
 }
 
 public interface IWritableSignal<T> : ISignal<T>

@@ -1,3 +1,5 @@
+using System.Reactive;
+
 namespace Projects.AvaloniaUtils.Signal;
 
 public static class BindingExtensions

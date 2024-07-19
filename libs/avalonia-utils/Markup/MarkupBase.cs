@@ -1,10 +1,8 @@
 using Avalonia.ReactiveUI;
-using Projects.AvaloniaUtils;
-using Projects.Project42.Markup;
 using ReactiveUI;
 using Splat;
 
-namespace Projects.Project42;
+namespace Projects.AvaloniaUtils.Markup;
 
 public class ViewModelBase : ReactiveObject, IEnableLocator;
 

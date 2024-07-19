@@ -17,7 +17,7 @@ public class FormField<T>
       from field in Value
       select !Options.Equal.Equals(init, field));
     IsValid =
-      new Computed<bool>(Value.ErrorState.Errors.Select(_ => !Value.HasErrors));
+      new Computed<bool>(Value.DataErrors.Messages.Select(_ => !Value.HasErrors));
   }
 
   protected FormFieldOptions<T> Options { get; }
@@ -29,13 +29,13 @@ public class FormField<T>
   public void ResetField()
   {
     Value.Set(_initValue.Get());
-    Value.ErrorState.SetErrors([]);
+    Value.DataErrors.SetErrors([]);
   }
 
   public void ResetField(T value)
   {
     Value.Set(value);
-    Value.ErrorState.SetErrors([]);
+    Value.DataErrors.SetErrors([]);
     _initValue.Set(value);
   }
 }
@@ -102,7 +102,7 @@ public static class FormFieldExtension
     return trigger.TriggerValidation.Subscribe(_ =>
     {
       var result = validator.Validate(field.Value.Get());
-      field.Value.ErrorState.SetErrors(result.FailToArray());
+      field.Value.DataErrors.SetErrors(result.FailToArray());
     });
   }
 
@@ -112,7 +112,7 @@ public static class FormFieldExtension
     var d = new CollectionDisposable();
     d.Add(field.Value.Subscribe(_ =>
     {
-      field.Value.ErrorState.SetErrors([]);
+      field.Value.DataErrors.SetErrors([]);
     }));
     d.Add(StartValidation(field, validator, trigger));
     return d;
