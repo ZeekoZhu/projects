@@ -1,7 +1,6 @@
 using System.Reactive;
 using Avalonia.ReactiveUI;
 using Projects.AvaloniaUtils;
-using Projects.Project42.Markup;
 using ReactiveUI;
 using Splat;
 

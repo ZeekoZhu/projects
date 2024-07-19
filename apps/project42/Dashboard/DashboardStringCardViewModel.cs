@@ -1,3 +1,5 @@
+using Projects.AvaloniaUtils;
+
 namespace Projects.Project42.Dashboard;
 
 public class DashboardStringCardViewModel(string text) : ViewModelBase, IDashboardCardViewModel
