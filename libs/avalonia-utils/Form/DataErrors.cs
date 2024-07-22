@@ -3,7 +3,7 @@ using Projects.AvaloniaUtils.Signal;
 
 namespace Projects.AvaloniaUtils.Form;
 
-public class DataErrors
+public class DataErrors: IObservable<string[]>
 {
   private readonly IWritableSignal<string[]> _messages = new State<string[]>([]);
 
@@ -25,6 +25,8 @@ public class DataErrors
     ErrorsChanged?.Invoke(this,
       new DataErrorsChangedEventArgs(null));
   }
+
+  public IDisposable Subscribe(IObserver<string[]> observer) => _messages.Subscribe(observer);
 }
 
 public static class DataErrorsExtensions
@@ -32,10 +34,5 @@ public static class DataErrorsExtensions
   public static void SetErrors(this DataErrors dataErrors, IObservable<IEnumerable<string>> errors)
   {
     errors.Subscribe(dataErrors.SetErrors);
-  }
-
-  public static IObservable<string[]> ObserveMessages(this DataErrors dataErrors)
-  {
-    return dataErrors.Messages.AsObservable();
   }
 }
