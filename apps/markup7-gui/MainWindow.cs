@@ -33,6 +33,11 @@ public class MainWindow : MarkupWindowBase<MainWindowViewModel>
               .Header("Flight Booker")
               .Content(
                 FlightBookerView()
+              ),
+            TabItem()
+              .Header("Timer")
+              .Content(
+                TimerView()
               )
           )
       );
