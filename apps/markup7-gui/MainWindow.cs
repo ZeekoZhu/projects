@@ -38,6 +38,11 @@ public class MainWindow : MarkupWindowBase<MainWindowViewModel>
               .Header("Timer")
               .Content(
                 TimerView()
+              ),
+            TabItem()
+              .Header("CRUD")
+              .Content(
+                CrudView()
               )
           )
       );
