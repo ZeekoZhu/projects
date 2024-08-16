@@ -1,0 +1,30 @@
+{
+  "name": "generated-blogkit-types",
+  "$schema": "../../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/generated/blogkit-types/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/generated/blogkit-types",
+        "main": "libs/generated/blogkit-types/src/index.ts",
+        "tsConfig": "libs/generated/blogkit-types/tsconfig.lib.json",
+        "assets": ["libs/generated/blogkit-types/*.md"]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/generated/blogkit-types/jest.config.ts"
+      }
+    }
+  },
+  "implicitDependencies": ["blogkit-swagger"]
+}
