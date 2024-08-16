@@ -19,7 +19,9 @@ module Program =
 
     builder.Services.AddControllers()
     builder.Services.AddGiraffe()
-    builder.Services.AddSingleton<ISlugifier>(LocalSlugifier())
+    builder.Services.AddSingleton<LocalSlugifier>()
+    builder.Services.AddSingleton<AISlugifier>()
+    builder.Services.AddSingleton<MetaSlugifier>()
 
     let app = builder.Build()
 

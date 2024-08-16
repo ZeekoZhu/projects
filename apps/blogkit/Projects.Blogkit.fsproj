@@ -8,12 +8,15 @@
     <Compile Include="WeatherForecast.fs" />
     <Compile Include="Services\ISlugifier.fs" />
     <Compile Include="Services\LocalSlugifier.fs" />
+    <Compile Include="Services\AISlugifier.fs" />
+    <Compile Include="Services\MetaSlugifier.fs" />
     <Compile Include="Controllers\Slugify.fs" />
     <Compile Include="Routes.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Betalgo.OpenAI" Version="8.6.1" />
     <PackageReference Include="FSharpPlus" Version="1.6.1" />
     <PackageReference Include="FsToolkit.ErrorHandling" Version="4.16.0" />
     <PackageReference Include="Giraffe" Version="7.0.0" />
