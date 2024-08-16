@@ -43,6 +43,11 @@ public class MainWindow : MarkupWindowBase<MainWindowViewModel>
               .Header("CRUD")
               .Content(
                 CrudView()
+              ),
+            TabItem()
+              .Header("Circle Drawer")
+              .Content(
+                CircleDrawerView()
               )
           )
       );

@@ -1,6 +1,7 @@
 using NanoidDotNet;
 using Control = Avalonia.Controls.Control;
 using Layoutable = Avalonia.Layout.Layoutable;
+using StackPanel = Avalonia.Controls.StackPanel;
 
 namespace Projects.AvaloniaUtils.Styling;
 
@@ -254,4 +255,76 @@ public static class ThicknessExtensions
       return new Thickness(_left, _top, _right, _bottom);
     }
   }
+
+  #region StackPanel
+
+  /// <summary>
+  /// Set the <see cref="Avalonia.Controls.StackPanel.OrientationProperty"/> to <see cref="Avalonia.Layout.Orientation.Horizontal"/>
+  /// </summary>
+  /// <param name="style"></param>
+  /// <returns></returns>
+  public static Style OrientationHorizontal(this Style style)
+  {
+    style.Setters.Add(new Setter
+    {
+      Property = StackPanel.OrientationProperty,
+      Value = Orientation.Horizontal,
+    });
+    return style;
+  }
+
+  /// <summary>
+  /// Set the <see cref="Avalonia.Controls.StackPanel.OrientationProperty"/> to <see cref="Avalonia.Layout.Orientation.Vertical"/>
+  /// </summary>
+  /// <param name="style"></param>
+  /// <returns></returns>
+  public static Style OrientationVertical(this Style style)
+  {
+    style.Setters.Add(new Setter
+    {
+      Property = StackPanel.OrientationProperty,
+      Value = Orientation.Vertical,
+    });
+    return style;
+  }
+
+  #endregion
+
+
+  #region Border
+
+  /// <summary>
+  /// Set the <see cref="Avalonia.Controls.Border.BorderThicknessProperty"/>
+  /// </summary>
+  /// <param name="style"></param>
+  /// <param name="setter"></param>
+  /// <returns></returns>
+  public static Style BorderWidth(this Style style, Func<ThicknessSetter, ThicknessSetter> setter)
+  {
+    var thickness = setter(new ThicknessSetter(0)).Build();
+    style.Setters.Add(new Setter
+    {
+      Property = Avalonia.Controls.Border.BorderThicknessProperty,
+      Value = thickness
+    });
+    return style;
+  }
+
+  /// <summary>
+  /// Set the <see cref="Avalonia.Controls.Border.BorderBrushProperty"/>
+  /// </summary>
+  /// <param name="style"></param>
+  /// <param name="brush"></param>
+  /// <returns></returns>
+  public static Style BorderBrush(this Style style, Avalonia.Media.IBrush brush)
+  {
+    style.Setters.Add(new Setter
+    {
+      Property = Avalonia.Controls.Border.BorderBrushProperty,
+      Value = brush
+    });
+    return style;
+  }
+
+  #endregion
 }
