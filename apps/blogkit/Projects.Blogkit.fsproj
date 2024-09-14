@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,7 +25,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="..\..\.dockerignore">
+      <Link>.dockerignore</Link>
+    </Content>
     <Content Include="api.http" />
+    <Content Include="Dockerfile" />
   </ItemGroup>
 
 </Project>

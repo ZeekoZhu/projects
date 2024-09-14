@@ -1,8 +1,8 @@
 ### slugify English
-GET http://localhost:5196/api/v1/slugify?t=Hello World
+GET {{endpoint}}/api/v1/slugify?t=Hello World
 
 ### slugify Chinese
-GET http://localhost:5196/api/v1/slugify?t=如何科学饲养母猪
+GET {{endpoint}}/api/v1/slugify?t=如何科学饲养母猪
 
 ### GET ping
-GET http://localhost:5196/ping
+GET {{endpoint}}/ping

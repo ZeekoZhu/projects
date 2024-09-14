@@ -21,6 +21,21 @@
         }
       }
     },
+    "publish": {
+      "executor": "@nx-dotnet/core:publish",
+      "outputs": ["{workspaceRoot}/dist/publish/apps/blogkit"],
+      "options": {
+        "configuration": "Release",
+        "extraParameters": "/p:UseAppHost=false",
+        "output": "{workspaceRoot}/dist/publish/apps/blogkit"
+      }
+    },
+    "container": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "podman build -t docker.io/zeekozhu/blogkit:{args.tag} -f ./apps/blogkit/Dockerfile ."
+      }
+    },
     "serve": {
       "executor": "@nx-dotnet/core:serve",
       "options": {

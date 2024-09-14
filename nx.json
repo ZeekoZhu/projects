@@ -59,6 +59,10 @@
     },
     "swagger": {
       "cache": true
+    },
+    "publish": {
+      "cache": true,
+      "defaultConfiguration": "production"
     }
   },
   "namedInputs": {
